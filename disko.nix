@@ -78,6 +78,9 @@ disko.devices = {
           "persist" = {
             type = "zfs_fs";
             mountpoint = "/persist";
+            options.mountpoint = "/persist";
+            mountOptions = [ "zfsutil" ];
+            neededForBoot = true;
           };
         };
       };

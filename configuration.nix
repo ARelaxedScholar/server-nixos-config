@@ -11,13 +11,23 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   
-  networking.hostId = "smartfridge";
+  networking.hostId = "b4dc0ff3";
 
   # --- The Impermanence Wipe ---
   # This triggers the ZFS rollback to the clean slate every we boot
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
+ boot.initrd.systemd.services.rollback = {
+  description = "Rollback ZFS root to blank snapshot";
+  wantedBy = [ "initrd.target" ];
+  after = [ "zfs-import-zroot.service" ];
+  before = [ "sysroot.mount" ];
+  path = [ pkgs.zfs ];
+  unitConfig.DefaultDependencies = "no";
+  serviceConfig.Type = "oneshot";
+  script = ''
     zfs rollback -r zroot/root@blank
   '';
+};
+
 
   # --- Initrd SSH (The Fort Knox Early-Boot Unlock) ---
   boot.initrd.network = {
