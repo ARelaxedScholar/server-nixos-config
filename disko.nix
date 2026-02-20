@@ -31,12 +31,19 @@ disko.devices = {
           };
         };
       };
-
+boot.initrd.luks.devices."crypted_data" = {
+  device = "/dev/disk/by-id/ata-ST4000VN006-3CW104_ZW6365MF-part1";
+  
+};
       data_drive = {
         type = "disk";
         device = "/dev/disk/by-id/ata-ST4000VN006-3CW104_ZW6365MF";
         content = {
           type = "gpt";
+          settings = {
+            keyFile = "/persist/etc/secrets/data_drive.key";
+            allowDiscards = false;
+          };
           partitions = {
             luks_data = {
               size = "100%";
