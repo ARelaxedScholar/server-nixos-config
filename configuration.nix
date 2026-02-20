@@ -20,7 +20,7 @@
  boot.initrd.systemd.services.rollback = {
   description = "Rollback ZFS root to blank snapshot";
   wantedBy = [ "initrd.target" ];
-  after = [ "zfs-import-zroot.service" ];
+  after = [ "zfs-import-zroot.service" "systemd-cryptsetup@crypted_os.service" ];
   before = [ "sysroot.mount" ];
   path = [ pkgs.zfs ];
   unitConfig.DefaultDependencies = "no";
