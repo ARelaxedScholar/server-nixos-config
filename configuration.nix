@@ -6,6 +6,8 @@
     ./hardware-configuration.nix
     ./disko.nix 
   ];
+  # --- Needed for boot stuff ---
+  fileSystems."/persist".neededForBoot = true;
 
   # --- Bootloader ---
   boot.loader.systemd-boot.enable = true;
