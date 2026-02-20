@@ -80,7 +80,6 @@ disko.devices = {
             mountpoint = "/persist";
             options.mountpoint = "/persist";
             mountOptions = [ "zfsutil" ];
-            neededForBoot = true;
           };
         };
       };
