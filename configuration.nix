@@ -17,7 +17,7 @@
 
   # --- The Impermanence Wipe ---
   # This triggers the ZFS rollback to the clean slate every we boot
- boot.initrd.systemd.services.rollback = {
+ boot.initrd.services.rollback = {
   description = "Rollback ZFS root to blank snapshot";
   wantedBy = [ "initrd.target" ];
   after = [ "zfs-import-zroot.service" "systemd-cryptsetup@crypted_os.service" ];
