@@ -37,16 +37,16 @@ disko.devices = {
         device = "/dev/disk/by-id/ata-ST4000VN006-3CW104_ZW6365MF";
         content = {
           type = "gpt";
-          settings = {
-            keyFile = "/persist/etc/secrets/data_drive.key";
-            allowDiscards = false;
-          };
           partitions = {
             luks_data = {
               size = "100%";
               content = {
                 type = "luks";
                 name = "crypted_data";
+                settings = {
+                    keyFile = "/persist/etc/secrets/data_drive.key";
+                    allowDiscards = false;
+                  };
                 content = {
                   type = "zfs";
                   pool = "datapool";
