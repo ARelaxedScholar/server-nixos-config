@@ -62,7 +62,8 @@
 	initialPassword = "cryogenesis";
 	openssh.authorizedKeys.keys = [ 
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com" 
-  ];}
+  	];
+	};
 
   # --- Impermanence Persistent State ---
   # Tells the system which files MUST survive the reboot wipe
