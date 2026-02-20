@@ -30,7 +30,7 @@
   '';
 };
 
-boot.initrd.luks.devices."crypted_data" = {
+boot.initrd.systemd.luks.devices."crypted_data" = {
   device = "/dev/disk/by-id/ata-ST4000VN006-3CW104_ZW6365MF-part1";
   keyFile = "/persist/etc/secrets/data_drive.key";
 };
