@@ -23,8 +23,9 @@
   # --- ZFS Tweaks ---
   boot.zfs.forceImportRoot = true;
 
-  # Ensure the data drive is NOT unlocked in initrd (it depends on /persist)
-  boot.initrd.luks.devices.crypted_data.enable = lib.mkForce false;
+  # This ensures the data drive doesn't stop the boot if the key isn't ready.
+  # The system will continue and try to unlock it again in Stage 2.
+  boot.initrd.luks.devices."crypted_data".keyFile = lib.mkForce null;
 
   # --- The Impermanence Wipe ---
   # This triggers the ZFS rollback to the clean slate every we boot
