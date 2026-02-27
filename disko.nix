@@ -1,9 +1,9 @@
 {
-disko.devices = {
+  disko.devices = {
     disk = {
       os_drive = {
         type = "disk";
-        device = "/dev/disk/by-id/ata-SSD_HB202409900900016861"; 
+        device = "/dev/disk/by-id/ata-SSD_HB202409900900016861";
         content = {
           type = "gpt";
           partitions = {
@@ -40,13 +40,14 @@ disko.devices = {
           partitions = {
             luks_data = {
               size = "100%";
+              initrd = false; # Don't try to unlock in initrd, depends on /persist
               content = {
                 type = "luks";
                 name = "crypted_data";
                 settings = {
-                    keyFile = "/persist/etc/secrets/data_drive.key";
-                    allowDiscards = false;
-                  };
+                  keyFile = "/persist/etc/secrets/data_drive.key";
+                  allowDiscards = false;
+                };
                 content = {
                   type = "zfs";
                   pool = "datapool";
@@ -87,7 +88,7 @@ disko.devices = {
           };
         };
       };
-      
+
       datapool = {
         type = "zpool";
         rootFsOptions = {
@@ -101,7 +102,7 @@ disko.devices = {
         datasets = {
           "storage" = {
             type = "zfs_fs";
-            mountpoint = "/mnt/data"; 
+            mountpoint = "/mnt/data";
           };
         };
       };
