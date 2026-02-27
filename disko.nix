@@ -43,7 +43,6 @@
               content = {
                 type = "luks";
                 name = "crypted_data";
-                initrd = false; # Don't try to unlock in initrd, depends on /persist
                 settings = {
                   keyFile = "/persist/etc/secrets/data_drive.key";
                   allowDiscards = false;

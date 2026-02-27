@@ -22,7 +22,9 @@
 
   # --- ZFS Tweaks ---
   boot.zfs.forceImportRoot = true;
-  boot.zfs.forceImportAll = true;
+
+  # Ensure the data drive is NOT unlocked in initrd (it depends on /persist)
+  boot.initrd.luks.devices.crypted_data.enable = lib.mkForce false;
 
   # --- The Impermanence Wipe ---
   # This triggers the ZFS rollback to the clean slate every we boot
