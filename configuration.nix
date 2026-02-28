@@ -74,7 +74,13 @@
   };
 
   # Enable docker
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    daemon.settings = {
+      data-root = "/mnt/data/docker";
+    };
+  };
+
   users.users = {
     root = {
       hashedPasswordFile = "/persist/etc/secrets/root-password";
@@ -104,7 +110,6 @@
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
-      "/var/lib/docker"
       "/var/lib/tailscale"
       "/home/user/server-nixos-config" 
       "/home/user/.ssh" 
