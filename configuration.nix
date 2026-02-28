@@ -107,6 +107,7 @@
       "/var/lib/docker"
       "/var/lib/tailscale"
       "/home/user/server-nixos-config" 
+      "/home/user/.ssh" 
     ];
     files = [
       "/etc/machine-id"
