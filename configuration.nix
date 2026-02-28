@@ -64,7 +64,9 @@
 
   # Required by NixOS to allow unlocking drives via SSH
   boot.initrd.systemd.enable = true;
-
+  
+  # Tailscale
+  services.tailscale.enable = true
   # --- Main System SSH Server ---
   services.openssh = {
     enable = true;
@@ -111,7 +113,7 @@
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
       "/var/lib/tailscale"
-      "/home/user/server-nixos-config" 
+      "/home/user/" 
       "/home/user/.ssh" 
     ];
     files = [
