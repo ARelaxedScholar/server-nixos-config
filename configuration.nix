@@ -25,7 +25,10 @@
 
   # This ensures the data drive doesn't stop the boot if the key isn't ready.
   # The system will continue and try to unlock it again in Stage 2.
-  boot.initrd.luks.devices."crypted_data".keyFile = lib.mkForce null;
+  boot.initrd.luks.devices."crypted_data" = {
+    keyFile = lib.mkForce "/persist/etc/secrets/data_drive.key";
+    keyFileSize = lib.mkForce 2048;
+  };
 
   # --- The Impermanence Wipe ---
   # This triggers the ZFS rollback to the clean slate every we boot
