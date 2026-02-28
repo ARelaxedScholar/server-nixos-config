@@ -87,7 +87,7 @@
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
-      # "/var/lib/tailscale" # Uncomment this later if you add Tailscale
+      "/var/lib/tailscale" # Uncomment this later if you add Tailscale
     ];
     files = [
       "/etc/machine-id"
@@ -103,6 +103,9 @@
     vim
     git
     wget
+    
+    # Utilities
+    nh
   ];
 
   # Leave this matching the version of your install media (e.g., "23.11" or "24.05")
