@@ -70,18 +70,25 @@
     settings.PermitRootLogin = "prohibit-password";
   };
 
-  # Your laptop's key to log into the main OS after it boots
-  users.users.user = {
-    isNormalUser = true;
-    home = "/home/user";
-    hashedPassword = "";
+  # Enable docker
+  virtualisation.docker.enable = true;
+  users.users = {
+    root = {
+      hashedPasswordFile = "/persist/etc/secrets/root-password";
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com"
+      ];
+    };
+    user = {
+      isNormalUser = true;
+      hashedPasswordFile = "/persist/etc/secrets/user-password";
+      extraGroups = [
+        "docker"
+        "wheel"
+      ];
+    };
   };
-  users.users.root = {
-    initialPassword = "cryogenesis";
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com"
-    ];
-  };
+ 
 
   # --- Impermanence Persistent State ---
   # Tells the system which files MUST survive the reboot wipe
@@ -91,6 +98,7 @@
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
+      "/var/lib/docker"
       "/var/lib/tailscale"
       "/home/user/server-nixos-config" 
     ];
