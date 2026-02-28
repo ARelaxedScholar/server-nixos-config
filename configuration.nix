@@ -82,6 +82,9 @@
     user = {
       isNormalUser = true;
       hashedPasswordFile = "/persist/etc/secrets/user-password";
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com"
+      ];
       extraGroups = [
         "docker"
         "wheel"
