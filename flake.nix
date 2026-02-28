@@ -14,7 +14,6 @@
       specialArgs = { inherit inputs; };
       modules = [
         ./configuration.nix
-        ./hardware-configuration.nix 
         disko.nixosModules.disko
         impermanence.nixosModules.impermanence
       ];
