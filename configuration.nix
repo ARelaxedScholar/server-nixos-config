@@ -46,19 +46,18 @@
   };
 
   # --- Initrd SSH (The Fort Knox Early-Boot Unlock) ---
-  #boot.initrd.network = {
-  #  enable = true;
-  #  ssh = {
-  #    enable = true;
-  #    port = 2222;
-  #    # Your laptop's key to unlock the encrypted drives
-  #    authorizedKeys = [
-  #      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com"
-  #    ];
-  #    # Points to the key safely stored in your permanent dataset
-  #    hostKeys = [ "/persist/etc/secrets/initrd/ssh_host_ed25519_key" ];
-  #  };
-  #};
+  boot.initrd.network = {
+    enable = true;
+    ssh = {
+      enable = true;
+      port = 2222;
+      authorizedKeys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com"
+      ];
+      # Points to the key safely stored in your permanent dataset
+      hostKeys = [ "/persist/etc/secrets/initrd/ssh_host_ed25519_key" ];
+    };
+  };
 
   # Required by NixOS to allow unlocking drives via SSH
   boot.initrd.systemd.enable = true;
@@ -72,6 +71,11 @@
   };
 
   # Your laptop's key to log into the main OS after it boots
+  users.users.user = {
+    isNormalUser = true;
+    home = "/home/user";
+    hashedPassword = "";
+  };
   users.users.root = {
     initialPassword = "cryogenesis";
     openssh.authorizedKeys.keys = [
@@ -87,7 +91,8 @@
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
-      "/var/lib/tailscale" # Uncomment this later if you add Tailscale
+      "/var/lib/tailscale"
+      "/home/user/server-nixos-config" 
     ];
     files = [
       "/etc/machine-id"
