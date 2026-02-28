@@ -66,7 +66,7 @@
   boot.initrd.systemd.enable = true;
   
   # Tailscale
-  services.tailscale.enable = true
+  services.tailscale.enable = true;
   # --- Main System SSH Server ---
   services.openssh = {
     enable = true;
@@ -114,7 +114,6 @@
       "/var/lib/systemd/coredump"
       "/var/lib/tailscale"
       "/home/user/" 
-      "/home/user/.ssh" 
     ];
     files = [
       "/etc/machine-id"
