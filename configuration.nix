@@ -158,7 +158,7 @@ systemd.services.deepseek-server = {
       # The command that runs the server
       ExecStart = ''
         ${pkgs.llama-cpp}/bin/llama-server \
-          -m /mnt/data/models/Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf \
+          -m /mnt/data/models/Qwen2.5-Coder-3B-Instruct-Q8_0.gguf \
           --host 0.0.0.0 \
           --port 11434 \
           --threads 4 \
