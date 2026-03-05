@@ -30,6 +30,9 @@
     "/data_drive.key" = "/persist/etc/secrets/data_drive.key";
   };
 
+  # CRITICAL: Open the firewall ONLY for Tailscale, so the public internet can't use my AI
+  networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 11434 ];
+
   # This ensures the data drive doesn't stop the boot if the key isn't ready.
   # The system will continue and try to unlock it again in Stage 2.
   boot.initrd.luks.devices."crypted_data" = {
@@ -141,7 +144,32 @@
     
     # Utilities
     nh
+
+    # AI
+    llama-cpp
   ];
+
+systemd.services.deepseek-server = {
+    description = "DeepSeek Speculative Decoding API Server";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" "tailscaled.service" ];
+    
+    serviceConfig = {
+      # The command that runs the server
+      ExecStart = ''
+        ${pkgs.llama-cpp}/bin/llama-server \
+          -m /mnt/data/models/DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf \
+          -md /mnt/data/models/DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf \
+          --host 0.0.0.0 \
+          --port 11434 \
+          --threads 4 \
+          -c 8192
+      '';
+      Restart = "always";
+      User = "user"; 
+      WorkingDirectory = "/mnt/data/models";
+    };
+  };
 
   # Leave this matching the version of your install media (e.g., "23.11" or "24.05")
   system.stateVersion = "25.11";
