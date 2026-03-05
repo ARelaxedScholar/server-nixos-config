@@ -11,6 +11,8 @@
     ./hardware-configuration.nix
     ./disko.nix
   ];
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # --- Needed for boot stuff ---
   fileSystems."/persist".neededForBoot = true;
 
