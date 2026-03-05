@@ -159,15 +159,14 @@ systemd.services.deepseek-server = {
       ExecStart = ''
         ${pkgs.llama-cpp}/bin/llama-server \
           -m /mnt/data/models/Qwen2.5-Coder-3B-Instruct-Q8_0.gguf \
-          --host 0.0.0.0 \
-          --port 11434 \
-          --threads 4 \
-          -c 32768 \
+          --host 0.0.0.0 --port 11434 --threads 4 \
+          -c 4096 \
           -np 1 \
-          --no-kv-unified \
-          --no-mmap \
           --alias qwen \
-          --chat-template chatml 
+          --no-mmap \
+          --no-warmup \
+          --batch-size 128 \
+          --ctx-size 4096
       '';
       Restart = "always";
       User = "user"; 
