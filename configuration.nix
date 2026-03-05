@@ -166,7 +166,8 @@ systemd.services.deepseek-server = {
           --chat-template chatml \
           --no-mmap \
           --batch-size 128 \
-          --nobuffer
+          --ctx-size 8192 \
+          --cont-batching
       '';
       Restart = "always";
       User = "user"; 
