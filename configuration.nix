@@ -163,10 +163,10 @@ systemd.services.deepseek-server = {
           -c 4096 \
           -np 1 \
           --alias qwen \
+          --chat-template chatml \
           --no-mmap \
           --no-warmup \
           --batch-size 128 \
-          --ctx-size 4096
       '';
       Restart = "always";
       User = "user"; 
