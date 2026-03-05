@@ -32,6 +32,11 @@
     keyFileSize = lib.mkForce 2048;
   };
 
+  # This copies the key from /persist into the initrd at build time
+  boot.initrd.secrets = {
+    "/data_drive.key" = "/persist/etc/secrets/data_drive.key";
+  };
+
   # --- The Impermanence Wipe ---
   # This triggers the ZFS rollback to the clean slate every we boot
   boot.initrd.systemd.services.rollback = {
