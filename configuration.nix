@@ -162,7 +162,7 @@ systemd.services.deepseek-server = {
           --host 0.0.0.0 \
           --port 11434 \
           --threads 4 \
-          -c 8192
+          -c 32768
       '';
       Restart = "always";
       User = "user"; 
