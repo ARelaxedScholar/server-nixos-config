@@ -165,7 +165,9 @@ systemd.services.deepseek-server = {
           -c 32768 \
           -np 1 \
           --no-kv-unified \
-          --no-mmap
+          --no-mmap \
+          --alias qwen \
+          --chat-template chatml 
       '';
       Restart = "always";
       User = "user"; 
