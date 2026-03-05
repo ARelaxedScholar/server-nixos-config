@@ -26,6 +26,7 @@
   # This ensures the data drive doesn't stop the boot if the key isn't ready.
   # The system will continue and try to unlock it again in Stage 2.
   boot.initrd.luks.devices."crypted_data" = {
+    device = "/dev/disk/by-uuid/3e371b2a-f3b2-4209-85d0-589c71c5fed3";
     keyFile = lib.mkForce "/persist/etc/secrets/data_drive.key";
     keyFileSize = lib.mkForce 2048;
   };
