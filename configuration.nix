@@ -21,6 +21,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostId = "b4dc0ff3";
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   # --- ZFS Tweaks ---
   boot.zfs.forceImportRoot = true;
