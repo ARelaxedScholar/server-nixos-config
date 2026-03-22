@@ -2,16 +2,10 @@
 
 let
   engineFlakePath = "/mnt/data/swagwatch-engine";
-  dataDir = "/mnt/data/swagwatch-engine-data";
-  vaultDir = "${dataDir}/vault";
+  vaultDir = "${engineFlakePath}/vault";
   envFile = "/persist/etc/secrets/remote-engine.env";
 in
 {
-  systemd.tmpfiles.rules = [
-    "d ${dataDir} 0750 user users -"
-    "d ${vaultDir} 0750 user users -"
-  ];
-
   systemd.services.remote-engine = {
     description = "SwagWatch Remote Engine";
     wantedBy = [ "multi-user.target" ];
@@ -35,8 +29,8 @@ in
       User = "user";
       Group = "users";
       EnvironmentFile = envFile;
-      WorkingDirectory = dataDir;
-      ExecStart = "${pkgs.nix}/bin/nix run path:${engineFlakePath}#default";
+      WorkingDirectory = engineFlakePath;
+      ExecStart = "${pkgs.nix}/bin/nix run git+file://${engineFlakePath}#default";
       Restart = "always";
       RestartSec = "5s";
     };
