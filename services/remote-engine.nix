@@ -1,24 +1,15 @@
 { pkgs, ... }:
 
 let
-  dataDir = "/mnt/data/swagwatch-engine";
+  engineFlakePath = "/mnt/data/swagwatch-engine";
+  dataDir = "/mnt/data/swagwatch-engine-data";
   vaultDir = "${dataDir}/vault";
   envFile = "/persist/etc/secrets/remote-engine.env";
-  engineFlakePath = "/home/user/Documents/SwagWatch_App/remote-engine";
 in
 {
-  users.groups.swagwatch = { };
-
-  users.users.swagwatch = {
-    isSystemUser = true;
-    group = "swagwatch";
-    home = dataDir;
-    createHome = false;
-  };
-
   systemd.tmpfiles.rules = [
-    "d ${dataDir} 0750 swagwatch swagwatch -"
-    "d ${vaultDir} 0750 swagwatch swagwatch -"
+    "d ${dataDir} 0750 user users -"
+    "d ${vaultDir} 0750 user users -"
   ];
 
   systemd.services.remote-engine = {
@@ -41,8 +32,8 @@ in
 
     serviceConfig = {
       Type = "simple";
-      User = "swagwatch";
-      Group = "swagwatch";
+      User = "user";
+      Group = "users";
       EnvironmentFile = envFile;
       WorkingDirectory = dataDir;
       ExecStart = "${pkgs.nix}/bin/nix run ${engineFlakePath}#default";
