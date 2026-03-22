@@ -36,7 +36,7 @@ in
       Group = "users";
       EnvironmentFile = envFile;
       WorkingDirectory = dataDir;
-      ExecStart = "${pkgs.nix}/bin/nix run ${engineFlakePath}#default";
+      ExecStart = "${pkgs.nix}/bin/nix run path:${engineFlakePath}#default";
       Restart = "always";
       RestartSec = "5s";
     };
