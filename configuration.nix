@@ -10,8 +10,13 @@
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ./services/cloudflared.nix
+    ./services/remote-engine.nix
   ];
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # --- Needed for boot stuff ---
   fileSystems."/persist".neededForBoot = true;
@@ -21,11 +26,14 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostId = "b4dc0ff3";
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   # --- ZFS Tweaks ---
   boot.zfs.forceImportRoot = true;
-  
+
   # This copies the key from /persist into the initrd at build time
   boot.initrd.secrets = {
     "/data_drive.key" = "/persist/etc/secrets/data_drive.key";
@@ -40,8 +48,6 @@
     keyFile = lib.mkForce "/data_drive.key";
     keyFileSize = lib.mkForce 2048;
   };
-
-
 
   # --- The Impermanence Wipe ---
   # This triggers the ZFS rollback to the clean slate every we boot
@@ -77,7 +83,7 @@
 
   # Required by NixOS to allow unlocking drives via SSH
   boot.initrd.systemd.enable = true;
-  
+
   # Tailscale
   services.tailscale.enable = true;
   # --- Main System SSH Server ---
@@ -115,7 +121,6 @@
       ];
     };
   };
- 
 
   # --- Impermanence Persistent State ---
   # Tells the system which files MUST survive the reboot wipe
@@ -126,7 +131,7 @@
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
       "/var/lib/tailscale"
-      "/home/user/" 
+      "/home/user/"
     ];
     files = [
       "/etc/machine-id"
@@ -142,7 +147,7 @@
     vim
     git
     wget
-    
+
     # Utilities
     nh
 
@@ -150,11 +155,14 @@
     llama-cpp
   ];
 
-systemd.services.deepseek-server = {
+  systemd.services.deepseek-server = {
     description = "DeepSeek Speculative Decoding API Server";
     wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" "tailscaled.service" ];
-    
+    after = [
+      "network.target"
+      "tailscaled.service"
+    ];
+
     serviceConfig = {
       # The command that runs the server
       ExecStart = ''
@@ -171,7 +179,7 @@ systemd.services.deepseek-server = {
           --cont-batching
       '';
       Restart = "always";
-      User = "user"; 
+      User = "user";
       WorkingDirectory = "/mnt/data/models";
     };
   };

@@ -1,0 +1,53 @@
+{ pkgs, ... }:
+
+let
+  dataDir = "/mnt/data/swagwatch-engine";
+  vaultDir = "${dataDir}/vault";
+  envFile = "/persist/etc/secrets/remote-engine.env";
+  engineFlakePath = "/home/user/Documents/SwagWatch_App/remote-engine";
+in
+{
+  users.groups.swagwatch = { };
+
+  users.users.swagwatch = {
+    isSystemUser = true;
+    group = "swagwatch";
+    home = dataDir;
+    createHome = false;
+  };
+
+  systemd.tmpfiles.rules = [
+    "d ${dataDir} 0750 swagwatch swagwatch -"
+    "d ${vaultDir} 0750 swagwatch swagwatch -"
+  ];
+
+  systemd.services.remote-engine = {
+    description = "SwagWatch Remote Engine";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    unitConfig.ConditionPathExists = envFile;
+
+    environment = {
+      SERVER_HOST = "127.0.0.1";
+      SERVER_PORT = "3001";
+      VAULT_PATH = vaultDir;
+      SOLVER_URL = "http://127.0.0.1:8000";
+      QDRANT_URL = "http://127.0.0.1:6333";
+      QDRANT_COLLECTION = "swagwatch_index";
+      PUBLIC_BASE_URL = "https://engine.swagwatch.app";
+      RUST_LOG = "swagwatch_engine=info,sqlx=warn,qdrant_client=warn";
+    };
+
+    serviceConfig = {
+      Type = "simple";
+      User = "swagwatch";
+      Group = "swagwatch";
+      EnvironmentFile = envFile;
+      WorkingDirectory = dataDir;
+      ExecStart = "${pkgs.nix}/bin/nix run ${engineFlakePath}#default";
+      Restart = "always";
+      RestartSec = "5s";
+    };
+  };
+}
