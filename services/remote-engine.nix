@@ -22,7 +22,10 @@ in
       QDRANT_COLLECTION = "swagwatch_index";
       PUBLIC_BASE_URL = "https://engine.swagwatch.app";
       RUST_LOG = "swagwatch_engine=info,sqlx=warn,qdrant_client=warn";
+      COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
     };
+
+    path = [ pkgs.nodejs_22 pkgs.chromium ];
 
     serviceConfig = {
       Type = "simple";
