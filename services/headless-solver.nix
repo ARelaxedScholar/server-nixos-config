@@ -32,7 +32,20 @@ let
         poetry-core  
       ];
       propagatedBuildInputs = with ps; [
-        playwright browserforge typing-extensions
+        playwright
+        browserforge
+        typing-extensions
+        # newly added from runtime deps check:
+        language-tags
+        lxml
+        numpy
+        platformdirs
+        pysocks
+        pyyaml
+        requests
+        screeninfo
+        tqdm
+        ua-parser
       ];
       doCheck = false;
     })
