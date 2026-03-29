@@ -50,7 +50,7 @@ services.postgresql = {
     work_mem = "256MB";      
     max_connections = "100";
     
-    # Aggressive cleanup stays (this is good for your ledger)
+    # Aggressive cleanup stays 
     autovacuum_naptime = "1min";
     autovacuum_vacuum_scale_factor = "0.05";
     autovacuum_analyze_scale_factor = "0.02";
