@@ -16,6 +16,7 @@ networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
     ./services/cloudflared.nix
     ./services/remote-engine.nix  
     ./services/animus.nix
+    ./services/headless-solver.nix
   ];
 
 # PostgreSQL Configuration
