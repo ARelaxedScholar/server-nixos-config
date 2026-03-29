@@ -14,8 +14,15 @@ networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
     ./hardware-configuration.nix
     ./disko.nix
     ./services/cloudflared.nix
-    ./services/remote-engine.nix
+    ./services/remote-engine.nix  
+    ./services/animus.nix
   ];
+
+  services.animus = {
+    enable = true;
+    envFile = /persist/etc/secrets/animus.env;
+  };
+
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
