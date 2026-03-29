@@ -26,7 +26,8 @@ let
         hash = "sha256-CiydJKxQcMEE58KxJcCjk39w76QWCE74iv6Uwypy7r4="; # fill in after first build
       };
       nativeBuildInputs = with ps; [
-        poetry-core
+        poetry-core  
+        setuptools
       ];
       propagatedBuildInputs = with ps; [
         playwright browserforge typing-extensions
