@@ -52,6 +52,10 @@ in
   ExecStart = "${cfg.package}/bin/animus";
   User = cfg.user;
   Group = cfg.group;
+  Nice = 19;                # Absolute lowest priority
+  CPUSchedulingPolicy = "idle"; 
+  IOWeight = 10;            # Only write video data when the disk is bored
+  MemoryMax = "4G";         # Cap it so it doesn't starve the DB
   WorkingDirectory = cfg.dataDir;
   Restart = "on-failure";
   RestartSec = "5s";
