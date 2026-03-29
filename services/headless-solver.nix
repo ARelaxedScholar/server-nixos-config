@@ -10,7 +10,7 @@ let
       format = "pyproject";
       src = ps.fetchPypi {
         inherit pname version;
-        hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # fill in after first build
+        hash = "sha256-uqrEK98Er00+kRPY9QR3evV3QBS4cgjG1Ep773ro0fg="; # fill in after first build
       };
       propagatedBuildInputs = with ps; [
         httpx playwright lxml cssselect orjson tldextract
