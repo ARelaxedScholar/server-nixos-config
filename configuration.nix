@@ -43,14 +43,22 @@ services.postgresql = {
 
   # Optimization for high-frequency scraping on your Optiplex
   settings = {
-    shared_buffers = "2GB";
-    work_mem = "64MB";
+    # This ensures 61.8k garments + recent ledger stay in RAM.
+    shared_buffers = "12GB"; 
+
+    # Keep these for stability
+    work_mem = "256MB";      
     max_connections = "100";
     
-    # Aggressive cleanup for your ledger's "dead rows"
+    # Aggressive cleanup stays (this is good for your ledger)
     autovacuum_naptime = "1min";
     autovacuum_vacuum_scale_factor = "0.05";
     autovacuum_analyze_scale_factor = "0.02";
+
+    # SSD Optimization
+    random_page_cost = "1.1"; 
+    effective_io_concurrency = "200";
+    effective_cache_size = "24GB"; # Tells the DB it can use the rest of RAM for OS cache
   };
 };
 
