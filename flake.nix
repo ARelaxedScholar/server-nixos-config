@@ -6,6 +6,8 @@
     disko.url = "github:nix-community/disko/latest";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
+    animus.url = "path:/home/user/server-nixos-config/services/animus.nix";  
+    animus.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -14,6 +16,7 @@
       nixpkgs,
       disko,
       impermanence,
+      animus,
       ...
     }@inputs:
     {
