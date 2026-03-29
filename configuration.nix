@@ -208,7 +208,8 @@ services.minio = {
 
   # Standard packages
   environment.systemPackages = with pkgs; [
-chromium
+    postgres_17
+    chromium
     vim
     git
     wget
