@@ -18,6 +18,51 @@ networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
     ./services/animus.nix
   ];
 
+# PostgreSQL Configuration
+services.postgresql = {
+  enable = true;
+  package = pkgs.postgresql_17; 
+
+  # Create both databases
+  ensureDatabases = [ 
+    "animus" 
+    "swagwatch" 
+  ];
+
+  # Create dedicated users for each service
+  ensureUsers = [
+    {
+      name = "animus";
+      ensureDBOwnership = true;
+    }
+    {
+      name = "swagwatch_admin";
+      ensureDBOwnership = true;
+    }
+  ];
+
+  # Optimization for high-frequency scraping on your Optiplex
+  settings = {
+    shared_buffers = "2GB";
+    work_mem = "64MB";
+    max_connections = "100";
+    
+    # Aggressive cleanup for your ledger's "dead rows"
+    autovacuum_naptime = "1min";
+    autovacuum_vacuum_scale_factor = "0.05";
+    autovacuum_analyze_scale_factor = "0.02";
+  };
+};
+
+# MinIO and Networking stay the same
+services.minio = {
+  enable = true;
+  dataDir = [ "/var/lib/minio/data" ];
+  rootCredentialsFile = "/persist/etc/secrets/animus-minio-credentials";
+};
+
+networking.firewall.allowedTCPPorts = [ 9000 9001 5432 ]; # Added 5432 if you want to connect via GUI from your laptop
+
   services.animus = {
     enable = true;
     envFile = /persist/etc/secrets/animus.env;
