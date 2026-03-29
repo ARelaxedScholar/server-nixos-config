@@ -31,6 +31,20 @@ in
       Type = "simple";
       User = "user";
       Group = "users";
+
+      # --- THE VIP RESOURCE BOUNDS ---
+      # Give the scraper breathing room, but protect the 32GB host
+      MemoryHigh = "8G";         # Start throttling here
+      MemoryMax = "12G";         # Absolute kill limit
+    
+      # Priority: Negative 'Nice' means SwagWatch gets CPU priority over Animus
+      Nice = -5;                 
+      CPUSchedulingPolicy = "rr"; 
+    
+      # Disk Priority: Direct, high-speed access to the SSD
+      IOWeight = 100;
+
+      # ENV
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
       ExecStart = "${pkgs.nix}/bin/nix run git+file://${engineFlakePath}#default";
