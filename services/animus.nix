@@ -48,38 +48,39 @@ in
         "postgresql.service"
       ];
       serviceConfig = {
-        Type = "simple";
-        User = cfg.user;
-        Group = cfg.group;
-        WorkingDirectory = cfg.dataDir;
-        Restart = "on-failure";
-        RestartSec = "5s";
-        EnvironmentFile = cfg.envFile;
-        Environment = [
-          "S3_ENDPOINT=http://localhost:9000"
-          "S3_BUCKET=animus-assets"
-          "S3_REGION=us-east-1"
-          "TTS_PROVIDER=piper"
-          "QWEN3_API_URL=http://localhost:8000/v1"
-          "QWEN3_VOICE=default"
-          "OPENAI_TTS_VOICE=onyx"
-          "OPENAI_TTS_MODEL=tts-1-hd"
-          "TTS_SPEED=1.0"
-          "ASSET_MIN_CLIPS_PER_SECTION=5"
-          "CHANNEL_NAME='The Light Of Orion'"
-          "CHANNEL_TAGLINE='Wisdom for the journey upward, enlightenment from a higher realm.'"
-          "TARGET_DURATION_MIN=15"
-          "TARGET_DURATION_MAX=20"
-          "SCRIPT_IMPROVEMENT_ENABLED=true"
-          "SCRIPT_IMPROVEMENT_MAX_ITERATIONS=10"
-          "SCRIPT_IMPROVEMENT_STAGNATION_THRESHOLD=10"
-          "SCRIPT_IMPROVEMENT_THRESHOLD=9.0"
-          "SCRIPT_IMPROVEMENT_CANDIDATES=3"
-          "VIDEOS_PER_WEEK=3"
-          "CONTROL_API_PORT=8080"
-          "RUST_LOG=animus=info,orichalcum=info"
-        ];
-      };
+  Type = "simple";
+  ExecStart = "${cfg.package}/bin/animus";
+  User = cfg.user;
+  Group = cfg.group;
+  WorkingDirectory = cfg.dataDir;
+  Restart = "on-failure";
+  RestartSec = "5s";
+  EnvironmentFile = cfg.envFile;
+  Environment = [
+    "S3_ENDPOINT=http://localhost:9000"
+    "S3_BUCKET=animus-assets"
+    "S3_REGION=us-east-1"
+    "TTS_PROVIDER=piper"
+    "QWEN3_API_URL=http://localhost:8000/v1"
+    "QWEN3_VOICE=default"
+    "OPENAI_TTS_VOICE=onyx"
+    "OPENAI_TTS_MODEL=tts-1-hd"
+    "TTS_SPEED=1.0"
+    "ASSET_MIN_CLIPS_PER_SECTION=5"
+    "CHANNEL_NAME='The Light Of Orion'"
+    "CHANNEL_TAGLINE='Wisdom for the journey upward, enlightenment from a higher realm.'"
+    "TARGET_DURATION_MIN=15"
+    "TARGET_DURATION_MAX=20"
+    "SCRIPT_IMPROVEMENT_ENABLED=true"
+    "SCRIPT_IMPROVEMENT_MAX_ITERATIONS=10"
+    "SCRIPT_IMPROVEMENT_STAGNATION_THRESHOLD=10"
+    "SCRIPT_IMPROVEMENT_THRESHOLD=9.0"
+    "SCRIPT_IMPROVEMENT_CANDIDATES=3"
+    "VIDEOS_PER_WEEK=3"
+    "CONTROL_API_PORT=8080"
+    "RUST_LOG=animus=info,orichalcum=info"
+  ];
+};
     };
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0755 ${cfg.user} ${cfg.group} -"
