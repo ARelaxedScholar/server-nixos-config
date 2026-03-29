@@ -6,6 +6,9 @@
 }:
 
 {
+  networking.useDHCP = true;
+networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
+
   # Imports hardware specifics and the Disko storage layout
   imports = [
     ./hardware-configuration.nix
@@ -144,6 +147,7 @@
 
   # Standard packages
   environment.systemPackages = with pkgs; [
+chromium
     vim
     git
     wget

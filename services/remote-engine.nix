@@ -25,7 +25,7 @@ in
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
     };
 
-    path = [ pkgs.nodejs_22 pkgs.chromium ];
+    path = with pkgs;[ nodejs_22 chromium which ];
 
     serviceConfig = {
       Type = "simple";
