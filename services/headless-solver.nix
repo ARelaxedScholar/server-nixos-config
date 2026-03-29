@@ -25,6 +25,9 @@ let
         inherit pname version;
         hash = "sha256-CiydJKxQcMEE58KxJcCjk39w76QWCE74iv6Uwypy7r4="; # fill in after first build
       };
+      nativeBuildInputs = with ps; [
+        poetry-core
+      ];
       propagatedBuildInputs = with ps; [
         playwright browserforge typing-extensions
       ];
