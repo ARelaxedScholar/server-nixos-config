@@ -1,20 +1,71 @@
-[Unit]
-Description=SwagWatch Headless Solver (Scrapling + Camoufox)
-After=network.target
+{ config, lib, pkgs, ... }:
 
-[Service]
-Type=simple
-User=user
-# Use the same directory as the rust engine
-WorkingDirectory=/mnt/data/swagwatch-engine
-# Use 'nix develop' to ensure the correct Python environment
-ExecStart=nix develop --command python solver/main.py
-Restart=always
-RestartSec=5
-# Ensure it listens on the port the engine expects
-Environment=PORT=8000
-Environment=SOLVER_URL=http://localhost:8000
-Environment=VAULT_PATH=/mnt/data/swagwatch-engine/vault
+let
+  # Build the Python environment with all solver dependencies
+  solverPython = pkgs.python3.withPackages (ps: with ps; [
+    # Core scraping stack
+    (ps.buildPythonPackage rec {
+      pname = "scrapling";
+      version = "0.4.2";
+      format = "pyproject";
+      src = ps.fetchPypi {
+        inherit pname version;
+        hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # fill in after first build
+      };
+      propagatedBuildInputs = with ps; [
+        httpx playwright lxml cssselect orjson tldextract
+      ];
+      doCheck = false;
+    })
+    (ps.buildPythonPackage rec {
+      pname = "camoufox";
+      version = "0.4.11"; # pin to your tested version
+      format = "pyproject";
+      src = ps.fetchPypi {
+        inherit pname version;
+        hash = "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="; # fill in after first build
+      };
+      propagatedBuildInputs = with ps; [
+        playwright browserforge typing-extensions
+      ];
+      doCheck = false;
+    })
+    # Add any other deps from your requirements.txt here
+    fastapi uvicorn httpx
+  ]);
 
-[Install]
-WantedBy=multi-user.target
+  # Pre-fetch the Camoufox Firefox binary into the Nix store
+  # Run `nix-prefetch-url --unpack <url>` to get the hash
+  camoufoxBrowser = pkgs.fetchzip {
+    url = "https://github.com/daijro/camoufox/releases/download/v0.4.11/camoufox-linux.tar.gz"; # adjust version/arch
+    hash = "sha256-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC="; # fill in
+  };
+
+  # Wrapper script that points Camoufox at the pre-fetched binary
+  startScript = pkgs.writeShellScript "swagwatch-solver-start" ''
+    export CAMOUFOX_EXECUTABLE="${camoufoxBrowser}/camoufox";
+    exec ${solverPython}/bin/python /mnt/data/swagwatch-engine/solver/main.py
+  '';
+
+in
+{
+  systemd.services.swagwatch-solver = {
+    description = "SwagWatch Headless Solver (Scrapling + Camoufox)";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+
+    serviceConfig = {
+      Type = "simple";
+      User = "user";
+      WorkingDirectory = "/mnt/data/swagwatch-engine";
+      ExecStart = startScript;
+      Restart = "always";
+      RestartSec = 5;
+      Environment = [
+        "PORT=8000"
+        "SOLVER_URL=http://localhost:8000"
+        "VAULT_PATH=/mnt/data/swagwatch-engine/vault"
+      ];
+    };
+  };
+}
