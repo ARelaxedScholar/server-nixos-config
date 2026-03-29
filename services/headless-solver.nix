@@ -23,7 +23,7 @@ let
       format = "pyproject";
       src = ps.fetchPypi {
         inherit pname version;
-        hash = "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="; # fill in after first build
+        hash = "sha256-CiydJKxQcMEE58KxJcCjk39w76QWCE74iv6Uwypy7r4="; # fill in after first build
       };
       propagatedBuildInputs = with ps; [
         playwright browserforge typing-extensions
