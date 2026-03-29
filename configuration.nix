@@ -36,7 +36,7 @@ services.postgresql = {
       ensureDBOwnership = true;
     }
     {
-      name = "swagwatch_admin";
+      name = "swagwatch";
       ensureDBOwnership = true;
     }
   ];
