@@ -61,8 +61,6 @@ services.minio = {
   rootCredentialsFile = "/persist/etc/secrets/animus-minio-credentials";
 };
 
-networking.firewall.allowedTCPPorts = [ 9000 9001 5432 ]; # Added 5432 if you want to connect via GUI from your laptop
-
   services.animus = {
     enable = true;
     envFile = /persist/etc/secrets/animus.env;
@@ -84,6 +82,9 @@ networking.firewall.allowedTCPPorts = [ 9000 9001 5432 ]; # Added 5432 if you wa
   networking.firewall.allowedTCPPorts = [
     80
     443
+    9000 
+    9001
+    5432 
   ];
 
   # --- ZFS Tweaks ---
