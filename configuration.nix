@@ -21,7 +21,7 @@ networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
 # PostgreSQL Configuration
 services.postgresql = {
   enable = true;
-  package = pkgs.postgresql_17; 
+  package = pkgs.postgresql_18;
 
   # Create both databases
   ensureDatabases = [ 
@@ -43,6 +43,7 @@ services.postgresql = {
 
   # Optimization for high-frequency scraping on your Optiplex
   settings = {
+    io_method = "io_uring";
     # This ensures 61.8k garments + recent ledger stay in RAM.
     shared_buffers = "12GB"; 
 
@@ -208,7 +209,8 @@ services.minio = {
 
   # Standard packages
   environment.systemPackages = with pkgs; [
-    postgresql_17
+    postgresql_18
+    pgcli
     chromium
     vim
     git
