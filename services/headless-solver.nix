@@ -23,10 +23,11 @@ let
           version = "3.11.7";
           hash = "sha256-mxpnJDlFgZzlXSSjC1nWoWjoYiBFLSyW9NHwk+ccDEk=";
         };
-        # Using fetchCargoVendor as required by NixOS 25.05+
+
+        # fetchCargoVendor is the standard for NixOS 25.05+
         cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
           inherit src;
-          hash = "sha256-eB7jVTsvBSUjtaKsbRnRtYSd+SqnCaoDyG76iExmSHc=";
+          hash = "sha256-eB7jVTsvBSUjtaKsbRnRtYSd+SqnCaoDyG76iExmSHc="; 
         };
       });
     };
@@ -50,14 +51,14 @@ let
     let
       mk = args: mkPkg ps args;
 
-      # NEW: Dependency for browserforge
+      # Corrected pname for PyPI source fetching
       apify-fingerprint-datapoints = mk {
-        pname = "apify-fingerprint-datapoints";
+        pname = "apify_fingerprint_datapoints"; 
         version = "0.11.0";
         hash = "sha256-P5BcOStRov+1XM/6CcEWZqvXN6vGIJN/GmqRFzYvNRU=";
       };
 
-      # FIXED: Added backend and missing runtime dependencies (click + apify)
+      # Included click and apify-fingerprint-datapoints to satisfy runtime checks
       browserforge  = mk { 
         pname = "browserforge";  
         version = "1.2.4";  
@@ -78,7 +79,6 @@ let
         pyproject = true;
         src = ps.fetchPypi { inherit pname version; hash = "sha256-uqrEK98Er00+kRPY9QR3evV3QBS4cgjG1Ep773ro0fg="; };
         nativeBuildInputs = with ps; [ setuptools ];
-        # Added msgspec and anyio which are required by modern Scrapling
         propagatedBuildInputs = with ps; [
           httpx playwright lxml cssselect orjson tldextract
           tld w3lib msgspec anyio
