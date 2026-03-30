@@ -51,14 +51,14 @@ let
     let
       mk = args: mkPkg ps args;
 
-      # Corrected pname for PyPI source fetching
+      # FIXED: Added backend = "hatch" to resolve BackendUnavailable: Cannot import 'hatchling.build'
       apify-fingerprint-datapoints = mk {
         pname = "apify_fingerprint_datapoints"; 
         version = "0.11.0";
-        hash = "sha256-P5BcOSsRon+1nM/kCJHBZqvXN6ucYglzPxAruzswJRU=";
+        hash = "sha256-P5BcOStRov+1XM/6CcEWZqvXN6vGIJN/GmqRFzYvNRU=";
+        backend = "hatch";
       };
 
-      # Included click and apify-fingerprint-datapoints to satisfy runtime checks
       browserforge  = mk { 
         pname = "browserforge";  
         version = "1.2.4";  
