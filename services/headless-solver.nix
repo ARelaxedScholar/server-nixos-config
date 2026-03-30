@@ -24,7 +24,6 @@ let
           hash = "sha256-mxpnJDlFgZzlXSSjC1nWoWjoYiBFLSyW9NHwk+ccDEk=";
         };
 
-        # fetchCargoVendor is the standard for NixOS 25.05+
         cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
           inherit src;
           hash = "sha256-eB7jVTsvBSUjtaKsbRnRtYSd+SqnCaoDyG76iExmSHc="; 
@@ -73,8 +72,23 @@ let
       };
       
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
+      
+      ua-parser     = mk { 
+        pname = "ua_parser";     
+        version = "1.0.1";  
+        hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; 
+        extraNativeBuildInputs = [ ps.setuptools-scm ps.pyyaml ];
+      };
+      
       tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; extraNativeBuildInputs = [ ps.setuptools-scm ]; };
       w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; backend = "hatch"; };
+
+      # NEW: Patchright package definition
+      patchright    = mk {
+        pname = "patchright";
+        version = "1.58.2";
+        hash = lib.fakeHash; # Will fail once; replace with the "got" hash
+      };
 
       scrapling = ps.buildPythonPackage rec {
         pname = "scrapling";
@@ -84,7 +98,7 @@ let
         nativeBuildInputs = with ps; [ setuptools ];
         propagatedBuildInputs = with ps; [
           httpx playwright lxml cssselect orjson tldextract
-          tld w3lib msgspec anyio curl_cffi
+          tld w3lib msgspec anyio curl-cffi patchright # Added patchright here
         ];
         doCheck = false;
       };
@@ -99,7 +113,7 @@ let
         [
           playwright typing-extensions lxml numpy platformdirs
           pysocks pyyaml requests tqdm
-          browserforge language-tags screeninfo ua-parser orjson
+          browserforge language-tags screeninfo ua-parser
         ];
         doCheck = false;
       };
