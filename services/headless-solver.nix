@@ -6,7 +6,7 @@ let
     packageOverrides = self: super: {
       cssselect = super.cssselect.overridePythonAttrs (_: {
         version = "1.4.0";
-        pyproject = true; # Changed from format = "pyproject"
+        pyproject = true;
         src = self.fetchPypi {
           pname = "cssselect";
           version = "1.4.0";
@@ -30,10 +30,12 @@ let
   mkPkg = ps: { pname, version, hash, backend ? "setuptools", extraDeps ? [] }:
     ps.buildPythonPackage {
       inherit pname version;
-      pyproject = true; # Changed from format = "pyproject"
+      pyproject = true;
       src = ps.fetchPypi { inherit pname version hash; };
       nativeBuildInputs = with ps;
-        if backend == "poetry" then [ poetry-core ] else [ setuptools ];
+        if backend == "poetry" then [ poetry-core ] 
+        else if backend == "hatch" then [ hatchling ] # Added hatch support
+        else [ setuptools ];
       propagatedBuildInputs = extraDeps;
       doCheck = false;
     };
@@ -47,12 +49,12 @@ let
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
       ua-parser     = mk { pname = "ua-parser";     version = "1.0.1";  hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; };
       tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; };
-      w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; };
+      w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; backend = "hatch"; }; # Fixed here
 
       scrapling = ps.buildPythonPackage rec {
         pname = "scrapling";
         version = "0.4.2";
-        pyproject = true; # Changed from format = "pyproject"
+        pyproject = true;
         src = ps.fetchPypi { inherit pname version; hash = "sha256-uqrEK98Er00+kRPY9QR3evV3QBS4cgjG1Ep773ro0fg="; };
         nativeBuildInputs = with ps; [ setuptools ];
         propagatedBuildInputs = with ps; [
@@ -65,7 +67,7 @@ let
       camoufox = ps.buildPythonPackage rec {
         pname = "camoufox";
         version = "0.4.11";
-        pyproject = true; # Changed from format = "pyproject"
+        pyproject = true;
         src = ps.fetchPypi { inherit pname version; hash = "sha256-CiydJKxQcMEE58KxJcCjk39w76QWCE74iv6Uwypy7r4="; };
         nativeBuildInputs = with ps; [ poetry-core ];
         propagatedBuildInputs = with ps;
