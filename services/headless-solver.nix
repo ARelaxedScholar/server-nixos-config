@@ -54,7 +54,7 @@ let
       apify-fingerprint-datapoints = mk {
         pname = "apify_fingerprint_datapoints"; 
         version = "0.11.0";
-        hash = "sha256-P5BcOSsRon+1nM/kCJHBZqvXN6ucYglzPxAruzswJRU="; # Updated hash here
+        hash = "sha256-P5BcOSsRon+1nM/kCJHBZqvXN6ucYglzPxAruzswJRU="; 
         backend = "hatch";
       };
 
@@ -73,7 +73,14 @@ let
       };
       
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
-      ua-parser     = mk { pname = "ua-parser";     version = "1.0.1";  hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; };
+      
+      # FIXED: PyPI source filename uses an underscore
+      ua-parser     = mk { 
+        pname = "ua_parser";     
+        version = "1.0.1";  
+        hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; 
+      };
+      
       tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; extraNativeBuildInputs = [ ps.setuptools-scm ]; };
       w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; backend = "hatch"; };
 
