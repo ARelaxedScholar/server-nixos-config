@@ -99,7 +99,7 @@ let
         [
           playwright typing-extensions lxml numpy platformdirs
           pysocks pyyaml requests tqdm
-          browserforge language-tags screeninfo ua-parser
+          browserforge language-tags screeninfo ua-parser orjson
         ];
         doCheck = false;
       };
