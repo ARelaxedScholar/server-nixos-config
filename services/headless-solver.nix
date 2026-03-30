@@ -24,8 +24,8 @@ let
           hash = "sha256-mxpnJDlFgZzlXSSjC1nWoWjoYiBFLSyW9NHwk+ccDEk=";
         };
 
-        # This recreates the vendor tarball for the new version
-        cargoDeps = self.rustPlatform.fetchCargoTarball {
+        # Corrected: Access rustPlatform from pkgs, not self
+        cargoDeps = pkgs.rustPlatform.fetchCargoTarball {
           inherit src;
           hash = lib.fakeHash; 
         };
