@@ -24,8 +24,8 @@ let
           hash = "sha256-mxpnJDlFgZzlXSSjC1nWoWjoYiBFLSyW9NHwk+ccDEk=";
         };
 
-        # Corrected: Access rustPlatform from pkgs, not self
-        cargoDeps = pkgs.rustPlatform.fetchCargoTarball {
+        # fetchCargoTarball was removed in 25.05; using fetchCargoVendor instead
+        cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
           inherit src;
           hash = lib.fakeHash; 
         };
