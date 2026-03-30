@@ -74,11 +74,12 @@ let
       
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
       
-      # FIXED: PyPI source filename uses an underscore
+      # FIXED: Added setuptools-scm and pyyaml to build inputs
       ua-parser     = mk { 
         pname = "ua_parser";     
         version = "1.0.1";  
         hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; 
+        extraNativeBuildInputs = [ ps.setuptools-scm ps.pyyaml ];
       };
       
       tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; extraNativeBuildInputs = [ ps.setuptools-scm ]; };
