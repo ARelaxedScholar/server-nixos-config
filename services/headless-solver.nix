@@ -17,11 +17,14 @@ let
 
       orjson = super.orjson.overridePythonAttrs (_: {
         version = "3.11.7";
+        pyproject = true;
         src = self.fetchPypi {
           pname = "orjson";
           version = "3.11.7";
           hash = "sha256-mxpnJDlFgZzlXSSjC1nWoWjoYiBFLSyW9NHwk+ccDEk=";
         };
+        # MUST ADD CARGOHASH FOR RUST PACKAGES
+        cargoHash = lib.fakeHash; 
       });
     };
   };
@@ -34,7 +37,7 @@ let
       src = ps.fetchPypi { inherit pname version hash; };
       nativeBuildInputs = with ps;
         if backend == "poetry" then [ poetry-core ] 
-        else if backend == "hatch" then [ hatchling ] # Added hatch support
+        else if backend == "hatch" then [ hatchling ]
         else [ setuptools ];
       propagatedBuildInputs = extraDeps;
       doCheck = false;
@@ -49,7 +52,7 @@ let
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
       ua-parser     = mk { pname = "ua-parser";     version = "1.0.1";  hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; };
       tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; };
-      w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; backend = "hatch"; }; # Fixed here
+      w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; backend = "hatch"; };
 
       scrapling = ps.buildPythonPackage rec {
         pname = "scrapling";
@@ -88,7 +91,6 @@ let
     ]
   );
 
-  # Runs once on each start to download the Camoufox Firefox binary if not present.
   fetchScript = pkgs.writeShellScript "swagwatch-solver-fetch" ''
     exec ${solverPython}/bin/python -m camoufox fetch
   '';
