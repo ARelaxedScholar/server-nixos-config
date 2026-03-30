@@ -51,11 +51,10 @@ let
     let
       mk = args: mkPkg ps args;
 
-      # FIXED: Added backend = "hatch" to resolve BackendUnavailable: Cannot import 'hatchling.build'
       apify-fingerprint-datapoints = mk {
         pname = "apify_fingerprint_datapoints"; 
         version = "0.11.0";
-        hash = "sha256-P5BcOSsRon+1nM/kCJHBZqvXN6ucYglzPxAruzswJRU=";
+        hash = "sha256-P5BcOStRov+1XM/6CcEWZqvXN6vGIJN/GmqRFzYvNRU=";
         backend = "hatch";
       };
 
@@ -67,7 +66,13 @@ let
         extraDeps = [ apify-fingerprint-datapoints ps.click ];
       };
 
-      language-tags = mk { pname = "language-tags"; version = "1.2.0";  hash = "sha256-6TSsuj49yF+GdwPspCGEepq3t2ebEbXVz9CW/rv4veY="; };
+      # FIXED: PyPI source filename uses an underscore
+      language-tags = mk { 
+        pname = "language_tags"; 
+        version = "1.2.0";  
+        hash = "sha256-6TSsuj49yF+GdwPspCGEepq3t2ebEbXVz9CW/rv4veY="; 
+      };
+      
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
       ua-parser     = mk { pname = "ua-parser";     version = "1.0.1";  hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; };
       tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; extraNativeBuildInputs = [ ps.setuptools-scm ]; };
