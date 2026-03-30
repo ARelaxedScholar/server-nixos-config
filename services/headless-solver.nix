@@ -1,68 +1,92 @@
 { config, lib, pkgs, ... }:
 
 let
-  # Build the Python environment with all solver dependencies
-  solverPython = pkgs.python3.withPackages (ps: with ps; [
-    # Core scraping stack
-    (ps.buildPythonPackage rec {
-      pname = "scrapling";
-      version = "0.4.2";
-      format = "pyproject";
-      src = ps.fetchPypi {
-        inherit pname version;
-        hash = "sha256-uqrEK98Er00+kRPY9QR3evV3QBS4cgjG1Ep773ro0fg="; # fill in after first build
-      };
-      nativeBuildInputs = with ps; [
-        setuptools
-      ];
-      propagatedBuildInputs = with ps; [
-        httpx playwright lxml cssselect orjson tldextract
-      ];
-      doCheck = false;
-    })
-    (ps.buildPythonPackage rec {
-      pname = "camoufox";
-      version = "0.4.11"; # pin to your tested version
-      format = "pyproject";
-      src = ps.fetchPypi {
-        inherit pname version;
-        hash = "sha256-CiydJKxQcMEE58KxJcCjk39w76QWCE74iv6Uwypy7r4="; # fill in after first build
-      };
-      nativeBuildInputs = with ps; [
-        poetry-core  
-      ];
-      propagatedBuildInputs = with ps; [
-        playwright
-        browserforge
-        typing-extensions
-        # newly added from runtime deps check:
-        language-tags
-        lxml
-        numpy
-        platformdirs
-        pysocks
-        pyyaml
-        requests
-        screeninfo
-        tqdm
-        ua-parser
-      ];
-      doCheck = false;
-    })
-    # Add any other deps from your requirements.txt here
-    fastapi uvicorn httpx
-  ]);
-
-  # Pre-fetch the Camoufox Firefox binary into the Nix store
-  # Run `nix-prefetch-url --unpack <url>` to get the hash
-  camoufoxBrowser = pkgs.fetchzip {
-    url = "https://github.com/daijro/camoufox/releases/download/v0.4.11/camoufox-linux.tar.gz"; # adjust version/arch
-    hash = "sha256-CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC="; # fill in
+  # Override nixpkgs python packages that are too old for scrapling
+  pyOverrides = pkgs.python3.override {
+    packageOverrides = self: super: {
+      cssselect = super.cssselect.overridePythonAttrs (_: {
+        version = "1.4.0";
+        src = self.fetchPypi {
+          pname = "cssselect";
+          version = "1.4.0";
+          hash = "sha256-/a8KFCXhff6MXPZhkdIRs1fPeHKuivxMZ2Ld2KxH/JI=";
+        };
+      });
+      orjson = super.orjson.overridePythonAttrs (_: {
+        version = "3.11.7";
+        src = self.fetchPypi {
+          pname = "orjson";
+          version = "3.11.7";
+          hash = "sha256-mxpnJDlFgZzlXSSjC1nWoWjoYiBFLSyW9NHwk+ccDEk=";
+        };
+      });
+    };
   };
 
-  # Wrapper script that points Camoufox at the pre-fetched binary
+  # Packages not in nixpkgs — built manually
+  mkPkg = ps: { pname, version, hash, backend ? "setuptools", extraDeps ? [] }:
+    ps.buildPythonPackage {
+      inherit pname version;
+      format = "pyproject";
+      src = ps.fetchPypi { inherit pname version hash; };
+      nativeBuildInputs = with ps; if backend == "poetry" then [ poetry-core ] else [ setuptools ];
+      propagatedBuildInputs = extraDeps;
+      doCheck = false;
+    };
+
+  solverPython = pyOverrides.withPackages (ps:
+    let
+      mk = args: mkPkg ps args;
+
+      browserforge  = mk { pname = "browserforge";  version = "1.2.4";  hash = "sha256-BWhkc3k3aYVuvTUoxpBx9b4OURJgmT6LK6g5hjcRoMQ="; };
+      language-tags = mk { pname = "language-tags"; version = "1.2.0";  hash = "sha256-6TSsuj49yF+GdwPspCGEepq3t2ebEbXVz9CW/rv4veY="; };
+      screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; };
+      ua-parser     = mk { pname = "ua-parser";     version = "1.0.1";  hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; };
+      tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; };
+      w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; };
+
+      scrapling = ps.buildPythonPackage rec {
+        pname = "scrapling";
+        version = "0.4.2";
+        format = "pyproject";
+        src = ps.fetchPypi { inherit pname version; hash = "sha256-uqrEK98Er00+kRPY9QR3evV3QBS4cgjG1Ep773ro0fg="; };
+        nativeBuildInputs = with ps; [ setuptools ];
+        propagatedBuildInputs = with ps; [
+          httpx playwright lxml cssselect orjson tldextract
+          tld w3lib
+        ];
+        doCheck = false;
+      };
+
+      camoufox = ps.buildPythonPackage rec {
+        pname = "camoufox";
+        version = "0.4.11";
+        format = "pyproject";
+        src = ps.fetchPypi { inherit pname version; hash = "sha256-CiydJKxQcMEE58KxJcCjk39w76QWCE74iv6Uwypy7r4="; };
+        nativeBuildInputs = with ps; [ poetry-core ];
+        propagatedBuildInputs = with ps; [
+          playwright typing-extensions lxml numpy platformdirs
+          pysocks pyyaml requests tqdm
+          browserforge language-tags screeninfo ua-parser
+        ];
+        doCheck = false;
+      };
+
+    in with ps; [
+      scrapling
+      camoufox
+      fastapi
+      uvicorn
+      httpx
+    ]
+  );
+
+  # Runs once on each start to download the Camoufox Firefox binary if not present.
+  fetchScript = pkgs.writeShellScript "swagwatch-solver-fetch" ''
+    exec ${solverPython}/bin/python -m camoufox fetch
+  '';
+
   startScript = pkgs.writeShellScript "swagwatch-solver-start" ''
-    export CAMOUFOX_EXECUTABLE="${camoufoxBrowser}/camoufox";
     exec ${solverPython}/bin/python /mnt/data/swagwatch-engine/solver/main.py
   '';
 
@@ -77,6 +101,7 @@ in
       Type = "simple";
       User = "user";
       WorkingDirectory = "/mnt/data/swagwatch-engine";
+      ExecStartPre = fetchScript;
       ExecStart = startScript;
       Restart = "always";
       RestartSec = 5;
