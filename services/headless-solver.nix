@@ -15,7 +15,7 @@ let
         nativeBuildInputs = [ self.hatchling ];
       });
 
-      orjson = super.orjson.overridePythonAttrs (_: {
+      orjson = super.orjson.overridePythonAttrs (oldAttrs: rec {
         version = "3.11.7";
         pyproject = true;
         src = self.fetchPypi {
@@ -23,8 +23,12 @@ let
           version = "3.11.7";
           hash = "sha256-mxpnJDlFgZzlXSSjC1nWoWjoYiBFLSyW9NHwk+ccDEk=";
         };
-        # MUST ADD CARGOHASH FOR RUST PACKAGES
-        cargoHash = lib.fakeHash; 
+
+        # This recreates the vendor tarball for the new version
+        cargoDeps = self.rustPlatform.fetchCargoTarball {
+          inherit src;
+          hash = lib.fakeHash; 
+        };
       });
     };
   };
