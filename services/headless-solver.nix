@@ -26,7 +26,7 @@ let
         # Using fetchCargoVendor as required by NixOS 25.05+
         cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
           inherit src;
-          hash = lib.fakeHash; # Run rebuild and replace with the "got" hash
+          hash = "sha256-eB7jVTsvBSUjtaKsbRnRtYSd+SqnCaoDyG76iExmSHc=";
         };
       });
     };
