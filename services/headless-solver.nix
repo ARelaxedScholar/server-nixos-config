@@ -84,7 +84,7 @@ let
         nativeBuildInputs = with ps; [ setuptools ];
         propagatedBuildInputs = with ps; [
           httpx playwright lxml cssselect orjson tldextract
-          tld w3lib msgspec anyio
+          tld w3lib msgspec anyio curl_cffi
         ];
         doCheck = false;
       };
