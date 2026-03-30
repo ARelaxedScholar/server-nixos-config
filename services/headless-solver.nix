@@ -55,7 +55,7 @@ let
       apify-fingerprint-datapoints = mk {
         pname = "apify_fingerprint_datapoints"; 
         version = "0.11.0";
-        hash = "sha256-P5BcOStRov+1XM/6CcEWZqvXN6vGIJN/GmqRFzYvNRU=";
+        hash = "sha256-P5BcOSsRon+1nM/kCJHBZqvXN6ucYglzPxAruzswJRU=";
         backend = "hatch";
       };
 
