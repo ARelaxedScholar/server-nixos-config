@@ -6,7 +6,7 @@ let
     packageOverrides = self: super: {
       cssselect = super.cssselect.overridePythonAttrs (_: {
         version = "1.4.0";
-        format = "pyproject";
+        pyproject = true; # Changed from format = "pyproject"
         src = self.fetchPypi {
           pname = "cssselect";
           version = "1.4.0";
@@ -30,7 +30,7 @@ let
   mkPkg = ps: { pname, version, hash, backend ? "setuptools", extraDeps ? [] }:
     ps.buildPythonPackage {
       inherit pname version;
-      format = "pyproject";
+      pyproject = true; # Changed from format = "pyproject"
       src = ps.fetchPypi { inherit pname version hash; };
       nativeBuildInputs = with ps;
         if backend == "poetry" then [ poetry-core ] else [ setuptools ];
@@ -52,7 +52,7 @@ let
       scrapling = ps.buildPythonPackage rec {
         pname = "scrapling";
         version = "0.4.2";
-        format = "pyproject";
+        pyproject = true; # Changed from format = "pyproject"
         src = ps.fetchPypi { inherit pname version; hash = "sha256-uqrEK98Er00+kRPY9QR3evV3QBS4cgjG1Ep773ro0fg="; };
         nativeBuildInputs = with ps; [ setuptools ];
         propagatedBuildInputs = with ps; [
@@ -65,7 +65,7 @@ let
       camoufox = ps.buildPythonPackage rec {
         pname = "camoufox";
         version = "0.4.11";
-        format = "pyproject";
+        pyproject = true; # Changed from format = "pyproject"
         src = ps.fetchPypi { inherit pname version; hash = "sha256-CiydJKxQcMEE58KxJcCjk39w76QWCE74iv6Uwypy7r4="; };
         nativeBuildInputs = with ps; [ poetry-core ];
         propagatedBuildInputs = with ps;
