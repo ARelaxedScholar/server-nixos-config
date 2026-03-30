@@ -24,7 +24,7 @@ let
           hash = "sha256-mxpnJDlFgZzlXSSjC1nWoWjoYiBFLSyW9NHwk+ccDEk=";
         };
 
-        # fetchCargoTarball was removed in 25.05; using fetchCargoVendor instead
+        # fetchCargoVendor is required for NixOS 25.05+ 
         cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
           inherit src;
           hash = lib.fakeHash; 
@@ -34,15 +34,16 @@ let
   };
 
   # Packages not in nixpkgs — built manually
-  mkPkg = ps: { pname, version, hash, backend ? "setuptools", extraDeps ? [] }:
+  # Added extraNativeBuildInputs to support packages like tld that need setuptools-scm
+  mkPkg = ps: { pname, version, hash, backend ? "setuptools", extraDeps ? [], extraNativeBuildInputs ? [] }:
     ps.buildPythonPackage {
       inherit pname version;
       pyproject = true;
       src = ps.fetchPypi { inherit pname version hash; };
       nativeBuildInputs = with ps;
-        if backend == "poetry" then [ poetry-core ] 
+        (if backend == "poetry" then [ poetry-core ] 
         else if backend == "hatch" then [ hatchling ]
-        else [ setuptools ];
+        else [ setuptools ]) ++ extraNativeBuildInputs;
       propagatedBuildInputs = extraDeps;
       doCheck = false;
     };
@@ -55,7 +56,8 @@ let
       language-tags = mk { pname = "language-tags"; version = "1.2.0";  hash = "sha256-6TSsuj49yF+GdwPspCGEepq3t2ebEbXVz9CW/rv4veY="; };
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
       ua-parser     = mk { pname = "ua-parser";     version = "1.0.1";  hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; };
-      tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; };
+      # Fixed: Added setuptools-scm to native build inputs
+      tld           = mk { pname = "tld";           version = "0.13.2"; hash = "sha256-2YP6krnXF0AHQvyoROKdXhgnEHnHvPq/ZtAbObShQ0U="; extraNativeBuildInputs = [ ps.setuptools-scm ]; };
       w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; backend = "hatch"; };
 
       scrapling = ps.buildPythonPackage rec {
