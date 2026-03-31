@@ -97,10 +97,25 @@ let
       w3lib         = mk { pname = "w3lib";         version = "2.4.1";  hash = "sha256-jdae45/2OY1wjHk6vHecM0ppusfO4c33FzbGae1r6GQ="; backend = "hatch"; };
 
       # NEW: Patchright package definition
-      patchright    = mk {
+      patchright = ps.buildPythonPackage rec {
         pname = "patchright";
         version = "1.58.2";
-        hash = "sha256-7kXvPqN6B7L3B2A1C9D8E7F0RInLpZfKstP6r7XzI9u=";
+        format = "wheel";
+        src = ps.fetchPypi {
+          inherit pname version format;
+          # Tells Nix to look for the Linux x86_64 wheel
+          dist = "py3";
+          python = "py3";
+          platform = "manylinux_2_17_x86_64.manylinux2014_x86_64"; 
+          hash = lib.fakeSha256; 
+        };
+        # Patchright (like Playwright) needs these dependencies to function
+        propagatedBuildInputs = with ps; [
+          greenlet
+          pyee
+          typing-extensions
+        ];
+        doCheck = false;
       };
 
       scrapling = ps.buildPythonPackage rec {
