@@ -144,14 +144,18 @@ in
       Type = "simple";
       User = "user";
       WorkingDirectory = "/mnt/data/swagwatch-engine";
-      ExecStartPre = fetchScript;
       ExecStart = startScript;
       Restart = "always";
-      RestartSec = 5;
+      RestartSec = 30;
+      StateDirectory = "camoufox";
       Environment = [
         "PORT=8000"
         "SOLVER_URL=http://localhost:8000"
         "VAULT_PATH=/mnt/data/swagwatch-engine/vault"
+        # Tell camoufox to use the persistent state directory
+        "CAMOUFOX_DIR=/var/lib/camoufox"
+        # CRITICAL: Prevent the 403 by skipping the update check if files exist
+        "CAMOUFOX_SKIP_UPDATE=1"
       ];
     };
   };
