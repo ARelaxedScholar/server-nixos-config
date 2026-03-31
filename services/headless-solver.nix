@@ -79,7 +79,7 @@ let
         format = "wheel";
         src = ps.fetchPypi {
           inherit pname version format;
-          hash = "sha256-67478397a68fac1a98fd0a31c416ea7c65a719141fc151d0211316f2cd337cc9";
+          hash = lib.fakeSha256;
           dist = "py3";
           python = "py3";
         };
