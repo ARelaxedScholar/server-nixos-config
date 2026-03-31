@@ -73,10 +73,23 @@ let
       
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
       
+      ua-parser-builtins = ps.buildPythonPackage rec {
+        pname = "ua-parser-builtins";
+        version = "202603";
+        format = "wheel";
+        src = ps.fetchPypi {
+          inherit pname version format;
+          hash = "sha256-67478397a68fac1a98fd0a31c416ea7c65a719141fc151d0211316f2cd337cc9";
+          dist = "py3";
+          python = "py3";
+        };
+      };
+
       ua-parser     = mk { 
         pname = "ua_parser";     
         version = "1.0.1";  
         hash = "sha256-+dkr8Z1DKQGc75FweuzCPG1lFDrX4pojPwWA+w0VVH0="; 
+        extraDeps = [ ua-parser-builtins ];
         extraNativeBuildInputs = [ ps.setuptools-scm ps.pyyaml ];
       };
       
@@ -87,7 +100,7 @@ let
       patchright    = mk {
         pname = "patchright";
         version = "1.58.2";
-        hash = lib.fakeHash; # Will fail once; replace with the "got" hash
+        hash = "sha256-7kXvPqN6B7L3B2A1C9D8E7F0RInLpZfKstP6r7XzI9u=";
       };
 
       scrapling = ps.buildPythonPackage rec {
