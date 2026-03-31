@@ -101,20 +101,20 @@ let
         pname = "patchright";
         version = "1.58.2";
         format = "wheel";
-        src = ps.fetchPypi {
-          inherit pname version format;
-          # Tells Nix to look for the Linux x86_64 wheel
-          dist = "py3";
-          python = "py3";
-          platform = "manylinux_2_17_x86_64.manylinux2014_x86_64"; 
-          hash = lib.fakeSha256; 
+        
+        # We use fetchurl to point to the exact Python 3.13 Linux wheel
+        src = pkgs.fetchurl {
+          url = "https://files.pythonhosted.org/packages/3a/0b/9d8b369c0d95d10d0f5926715b741586a11756540c6e8389658510a724be/patchright-1.58.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
+          hash = lib.fakeHash;
         };
-        # Patchright (like Playwright) needs these dependencies to function
+
+        # These are essential for patchright to function
         propagatedBuildInputs = with ps; [
           greenlet
           pyee
           typing-extensions
         ];
+
         doCheck = false;
       };
 
