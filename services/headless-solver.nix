@@ -74,12 +74,12 @@ let
       screeninfo    = mk { pname = "screeninfo";    version = "0.8.1";  hash = "sha256-mYMHa8x+NEAqGp5NfavzcpQR/Sq7PztL5+unNRnNLtE="; backend = "poetry"; };
       
       ua-parser-builtins = ps.buildPythonPackage rec {
-        pname = "ua-parser-builtins";
+        pname = "ua_parser_builtins";
         version = "202603";
         format = "wheel";
         src = ps.fetchPypi {
           inherit pname version format;
-          hash = lib.fakeSha256;
+          hash = "sha256-Z0eDl6aPrBqY/QoxxBbqfGWnGRQfwVHQIRMW8s0zfMk=";
           dist = "py3";
           python = "py3";
         };
@@ -126,7 +126,7 @@ let
         [
           playwright typing-extensions lxml numpy platformdirs
           pysocks pyyaml requests tqdm
-          browserforge language-tags screeninfo ua-parser
+          browserforge language-tags screeninfo ua-parser orjson
         ];
         doCheck = false;
       };
