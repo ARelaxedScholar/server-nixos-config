@@ -144,10 +144,16 @@ in
       Type = "simple";
       User = "user";
       WorkingDirectory = "/mnt/data/swagwatch-engine";
+      ExecStartPre = pkgs.writeShellScript "camoufox-conditional-fetch" ''
+        if [ ! -d "/var/lib/camoufox/bin" ]; then
+          ${solverPython}/bin/python -m camoufox fetch
+        fi
+      '';
       ExecStart = startScript;
       Restart = "always";
-      RestartSec = 30;
+      RestartSec = 60;
       StateDirectory = "camoufox";
+
       Environment = [
         "PORT=8000"
         "SOLVER_URL=http://localhost:8000"
