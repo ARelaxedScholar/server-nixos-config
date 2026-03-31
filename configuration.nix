@@ -224,34 +224,33 @@ services.minio = {
     llama-cpp
   ];
 
-  systemd.services.deepseek-server = {
-    description = "DeepSeek Speculative Decoding API Server";
-    wantedBy = [ "multi-user.target" ];
-    after = [
-      "network.target"
-      "tailscaled.service"
-    ];
-
-    serviceConfig = {
-      # The command that runs the server
-      ExecStart = ''
-        ${pkgs.llama-cpp}/bin/llama-server \
-          -m /mnt/data/models/Qwen2.5-Coder-3B-Instruct-Q8_0.gguf \
-          --host 0.0.0.0 --port 11434 --threads 4 \
-          -c 8192 \
-          -np 2 \
-          --alias qwen \
-          --chat-template chatml \
-          --no-mmap \
-          --batch-size 128 \
-          --ctx-size 8192 \
-          --cont-batching
-      '';
-      Restart = "always";
-      User = "user";
-      WorkingDirectory = "/mnt/data/models";
-    };
-  };
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    # Add the common libraries that headless browsers need
+    glibc
+    xorg.libX11
+    xorg.libXcomposite
+    xorg.libXdamage
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXrandr
+    xorg.libXrender
+    libGL
+    nss
+    nspr
+    fontconfig
+    freetype
+    dbus
+    glib
+    atk
+    at-spi2-atk
+    cups
+    expat
+    libdrm
+    mesa
+    libxshmfence
+    libuuid
+  ];
 
   # Leave this matching the version of your install media (e.g., "23.11" or "24.05")
   system.stateVersion = "25.11";
