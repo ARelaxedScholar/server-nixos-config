@@ -148,20 +148,27 @@ in
         if [ ! -d "/var/lib/camoufox/bin" ]; then
           ${solverPython}/bin/python -m camoufox fetch
         fi
+        
+        # Fetch Patchright browsers if missing
+        # Patchright usually stores things in ~/.cache/ms-playwright or a custom path
+        # We should point it to our state directory too
+        if [ ! -d "/var/lib/camoufox/patchright" ]; then
+          echo "Fetching Patchright browsers..."
+          XDG_CACHE_HOME=/var/lib/camoufox ${solverPython}/bin/python -m patchright install chromium
+        fi
       '';
       ExecStart = startScript;
       Restart = "always";
-      RestartSec = 60;
+      RestartSec = 5;
       StateDirectory = "camoufox";
-
       Environment = [
         "PORT=8000"
         "SOLVER_URL=http://localhost:8000"
         "VAULT_PATH=/mnt/data/swagwatch-engine/vault"
-        # Tell camoufox to use the persistent state directory
         "CAMOUFOX_DIR=/var/lib/camoufox"
-        # CRITICAL: Prevent the 403 by skipping the update check if files exist
         "CAMOUFOX_SKIP_UPDATE=1"
+        # Tell Patchright/Playwright to look in our StateDirectory
+        "PLAYWRIGHT_BROWSERS_PATH=/var/lib/camoufox/patchright"
       ];
     };
   };
