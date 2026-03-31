@@ -228,13 +228,13 @@ services.minio = {
   programs.nix-ld.libraries = with pkgs; [
     # Add the common libraries that headless browsers need
     glibc
-    xorg.libX11
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXrandr
-    xorg.libXrender
+    libX11          # was xorg.libX11
+    libXcomposite    # was xorg.libXcomposite
+    libXdamage       # was xorg.libXdamage
+    libXext          # was xorg.libXext
+    libXfixes        # was xorg.libXfixes
+    libXrandr        # was xorg.libXrandr
+    libXrender
     libGL
     nss
     nspr
