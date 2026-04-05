@@ -64,6 +64,11 @@ services.postgresql = {
   };
 };
 
+systemd.services.postgresql = {
+  requires = [ "var-lib-postgresql.mount" ];
+  after = [ "var-lib-postgresql.mount" ];
+};
+
 # MinIO and Networking stay the same
 services.minio = {
   enable = true;
