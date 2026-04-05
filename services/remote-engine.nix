@@ -17,7 +17,7 @@ in
       SERVER_HOST = "127.0.0.1";
       SERVER_PORT = "3001";
       VAULT_PATH = vaultDir;
-      SOLVER_URL = "http://127.0.0.1:8000";
+      SOLVER_URL = "http://127.0.0.1:8001";
       QDRANT_URL = "http://127.0.0.1:6333";
       QDRANT_COLLECTION = "swagwatch_index";
       PUBLIC_BASE_URL = "https://engine.swagwatch.app";
