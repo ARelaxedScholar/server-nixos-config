@@ -98,6 +98,15 @@ systemd.services.zfs-backup-persist = {
   };
 };
 
+systemd.timers.zfs-backup-persist = {
+  wantedBy = [ "timers.target" ];
+  timerConfig = {
+    OnCalendar = "03:00";
+    Persistent = true; 
+    Unit = "zfs-backup-persist.service";
+  };
+};
+
 # MinIO and Networking stay the same
 services.minio = {
   enable = true;
