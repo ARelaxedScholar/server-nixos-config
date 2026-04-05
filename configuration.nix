@@ -80,24 +80,31 @@ systemd.services.zfs-backup-persist = {
     Type = "oneshot";
     ExecStart = pkgs.writeShellScript "zfs-backup" ''
       set -e
-      # 1. Create the backup destination dataset if it doesn't exist
+      # 1. Ensure the destination parent exists
       ${pkgs.zfs}/bin/zfs list datapool/backups >/dev/null 2>&1 || ${pkgs.zfs}/bin/zfs create datapool/backups
 
-      # 2. Create a timestamped snapshot of your live data
+      # 2. Create the new snapshot
       TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
-      ${pkgs.zfs}/bin/zfs snapshot zroot/persist@backup_$TIMESTAMP
+      SNAP_NAME="zroot/persist@backup_$TIMESTAMP"
+      ${pkgs.zfs}/bin/zfs snapshot "$SNAP_NAME"
       
-      # 3. Stream the data to the storage drive
-      # This clones the 8.20G (and any future growth) to the 3.3T pool
-      ${pkgs.zfs}/bin/zfs send -vR zroot/persist@backup_$TIMESTAMP | ${pkgs.zfs}/bin/zfs receive -F datapool/backups/persist_mirror
-      
-      # 4. Local Housekeeping: Keep only the last 31 snapshots on the OS drive
-      # (This keeps your 79G zroot from filling up with old metadata)
+      # 3. Perform the Replication
+      # -R: Include all child datasets (Postgres, MinIO, etc.)
+      # -F: Force the receive (Rollback destination to match source snapshots)
+      # -u: Ensure the destination is NOT mounted during the receive (prevents busy errors)
+      echo "Starting ZFS replication for $SNAP_NAME..."
+      ${pkgs.zfs}/bin/zfs send -vR "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv datapool/backups/persist_mirror
+
+      # 4. Cleanup: Keep 31 days of history on the Source (zroot)
       ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation | grep "zroot/persist@backup_" | tail -n +32 | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy || true
+      
+      # 5. Cleanup: Keep 31 days of history on the Destination (datapool)
+      ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation | grep "datapool/backups/persist_mirror@backup_" | tail -n +32 | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy || true
+      
+      echo "Backup complete. 76k garments secured."
     '';
   };
 };
-
 systemd.timers.zfs-backup-persist = {
   wantedBy = [ "timers.target" ];
   timerConfig = {
