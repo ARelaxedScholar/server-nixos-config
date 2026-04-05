@@ -101,11 +101,10 @@ let
         pname = "patchright";
         version = "1.58.2";
         format = "wheel";
-        
-        # We use fetchurl to point to the exact Python 3.13 Linux wheel
+
         src = pkgs.fetchurl {
-          url = "https://files.pythonhosted.org/packages/3a/0b/9d8b369c0d95d10d0f5926715b741586a11756540c6e8389658510a724be/patchright-1.58.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
-          hash = lib.fakeHash;
+          url = "https://files.pythonhosted.org/packages/e5/2b/cb8b7053f2ede3586d89cb7e45f7b643751f8d97b4dfa9af7f4188aac3f9/patchright-1.58.2-py3-none-manylinux1_x86_64.whl";
+          hash = "sha256-E670FsWfI/D7VSZYKBiQ7zSdsr7i5EnBWVYIZ8Lmy2E=";
         };
 
         # These are essential for patchright to function

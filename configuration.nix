@@ -197,6 +197,9 @@ services.minio = {
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
       "/var/lib/tailscale"
+      "/var/lib/postgresql"
+      "/var/lib/minio"
+      "/var/lib/animus"
       "/home/user/"
     ];
     files = [
