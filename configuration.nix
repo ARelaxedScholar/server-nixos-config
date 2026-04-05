@@ -67,6 +67,35 @@ services.postgresql = {
 systemd.services.postgresql = {
   requires = [ "var-lib-postgresql.mount" ];
   after = [ "var-lib-postgresql.mount" ];
+  unitConfig = {
+    # If the mount fails, don't start Postgres and create a fake directory
+    ConditionPathIsMountPoint = "/var/lib/postgresql";
+  };
+};
+
+# Automatic ZFS Backups to the 3.3T datapool
+systemd.services.zfs-backup-persist = {
+  description = "Backup persist dataset to datapool storage";
+  serviceConfig = {
+    Type = "oneshot";
+    ExecStart = pkgs.writeShellScript "zfs-backup" ''
+      set -e
+      # 1. Create the backup destination dataset if it doesn't exist
+      ${pkgs.zfs}/bin/zfs list datapool/backups >/dev/null 2>&1 || ${pkgs.zfs}/bin/zfs create datapool/backups
+
+      # 2. Create a timestamped snapshot of your live data
+      TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
+      ${pkgs.zfs}/bin/zfs snapshot zroot/persist@backup_$TIMESTAMP
+      
+      # 3. Stream the data to the storage drive
+      # This clones the 8.20G (and any future growth) to the 3.3T pool
+      ${pkgs.zfs}/bin/zfs send -vR zroot/persist@backup_$TIMESTAMP | ${pkgs.zfs}/bin/zfs receive -F datapool/backups/persist_mirror
+      
+      # 4. Local Housekeeping: Keep only the last 31 snapshots on the OS drive
+      # (This keeps your 79G zroot from filling up with old metadata)
+      ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation | grep "zroot/persist@backup_" | tail -n +32 | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy || true
+    '';
+  };
 };
 
 # MinIO and Networking stay the same
