@@ -17,6 +17,7 @@ networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
     ./services/remote-engine.nix  
     ./services/animus.nix
     ./services/headless-solver.nix
+    ./services/qdrant.nix
   ];
 
 # PostgreSQL Configuration
@@ -45,11 +46,12 @@ services.postgresql = {
   # Optimization for high-frequency scraping on your Optiplex
   settings = {
     io_method = "io_uring";
-    # This ensures 61.8k garments + recent ledger stay in RAM.
-    shared_buffers = "12GB"; 
+    # Reduced from 12GB to 4GB – 61.8k garments + active ledger fit comfortably;
+    # freed RAM is reallocated to Qdrant's HNSW index.
+    shared_buffers = "4GB";
 
     # Keep these for stability
-    work_mem = "256MB";      
+    work_mem = "128MB";
     max_connections = "100";
     
     # Aggressive cleanup stays 
@@ -60,7 +62,7 @@ services.postgresql = {
     # SSD Optimization
     random_page_cost = "1.1"; 
     effective_io_concurrency = "200";
-    effective_cache_size = "24GB"; # Tells the DB it can use the rest of RAM for OS cache
+    effective_cache_size = "20GB"; # Reflects the rebalanced memory budget
   };
 };
 
@@ -149,6 +151,12 @@ services.minio = {
 
   # --- ZFS Tweaks ---
   boot.zfs.forceImportRoot = true;
+
+  # Cap ZFS ARC at 5GB so it doesn't fight Postgres (4GB) and Qdrant (up to 6GB)
+  # for the same physical RAM. The OS + scraper headroom covers the rest.
+  boot.extraModprobeConfig = ''
+    options zfs zfs_arc_max=5368709120
+  '';
 
   # This copies the key from /persist into the initrd at build time
   boot.initrd.secrets = {
@@ -249,6 +257,7 @@ services.minio = {
       "/var/lib/tailscale"
       "/var/lib/postgresql"
       "/var/lib/minio"
+      "/var/lib/qdrant"
       "/var/lib/animus"
       "/home/user/"
     ];
