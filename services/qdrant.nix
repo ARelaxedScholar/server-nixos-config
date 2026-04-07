@@ -8,7 +8,7 @@
         # Keep the HNSW navigation graph in DDR3 RAM for fast vector search
         hnsw_index.on_disk = false;
         performance = {
-          # Throttle global optimisation CPU budget to 1 core so scraper/animus
+          # Throttle global optimization CPU budget to 1 core so scraper/animus
           # have headroom.  In Qdrant ≥ 1.13 the correct key is
           # `optimizer_cpu_budget` (positive = exact count); the old
           # `max_optimization_threads` key was removed from PerformanceConfig
