@@ -123,6 +123,22 @@ services.minio = {
   rootCredentialsFile = "/persist/etc/secrets/animus-minio-credentials";
 };
 
+# Ensure the persistent source directories are owned by the minio user before
+# the bind mounts are established (impermanence creates them as root:root by
+# default, which causes "file access denied" when minio starts).
+systemd.tmpfiles.rules = [
+  "d /persist/var/lib/minio        0750 minio minio -"
+  "d /persist/var/lib/minio/data   0750 minio minio -"
+  "d /persist/var/lib/minio/config 0750 minio minio -"
+  "d /persist/var/lib/minio/certs  0750 minio minio -"
+];
+
+# Wait for the impermanence bind mount before starting (mirrors the postgresql fix)
+systemd.services.minio = {
+  requires = [ "var-lib-minio.mount" ];
+  after = [ "var-lib-minio.mount" ];
+};
+
   services.animus = {
     enable = true;
     envFile = /persist/etc/secrets/animus.env;
