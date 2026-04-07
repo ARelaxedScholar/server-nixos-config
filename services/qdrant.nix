@@ -7,8 +7,18 @@
       storage = {
         # Keep the HNSW navigation graph in DDR3 RAM for fast vector search
         hnsw_index.on_disk = false;
-        # Throttle optimization to 1 thread so scraper/animus have CPU headroom
-        performance.max_optimization_threads = 1;
+        performance = {
+          # Throttle global optimisation CPU budget to 1 core so scraper/animus
+          # have headroom.  In Qdrant ≥ 1.13 the correct key is
+          # `optimizer_cpu_budget` (positive = exact count); the old
+          # `max_optimization_threads` key was removed from PerformanceConfig
+          # and its presence as an integer caused config-rs 0.15.x to fail
+          # deserialization.
+          optimizer_cpu_budget = 1;
+          # Suppress the stale NixOS-module default (max_optimization_threads: 1)
+          # so it does not appear as a concrete integer in the generated YAML.
+          max_optimization_threads = lib.mkForce null;
+        };
       };
     };
   };
