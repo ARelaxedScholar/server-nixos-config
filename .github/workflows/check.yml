@@ -18,4 +18,4 @@ jobs:
             experimental-features = nix-command flakes
 
       - name: Evaluate and build NixOS config
-        run: nix flake check && nix build .#nixosConfigurations.server.config.system.build.toplevel --no-link
+        run: nix flake lock --update-input animus && nix flake check && nix build .#nixosConfigurations.server.config.system.build.toplevel --no-link

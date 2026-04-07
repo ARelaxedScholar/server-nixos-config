@@ -5,7 +5,7 @@
     disko.url = "github:nix-community/disko/latest";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
-    animus.url = "path:/home/user/Animus";
+    animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs =
