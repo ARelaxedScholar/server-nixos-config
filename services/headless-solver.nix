@@ -172,14 +172,12 @@ in
       User = "user";
       WorkingDirectory = "/mnt/data/swagwatch-engine";
       ExecStartPre = pkgs.writeShellScript "camoufox-conditional-fetch" ''
-        if [ ! -d "/home/user/.cache/camoufox" ]; then
+        if [ ! -d "/persist/cache/camoufox" ]; then
           ${solverPython}/bin/python -m camoufox fetch
         fi
-        
+
         # Fetch Patchright browsers if missing
-        # Patchright usually stores things in ~/.cache/ms-playwright or a custom path
-        # We should point it to our state directory too
-        if [ ! -d "/home/user/.cache/camoufox/patchright" ]; then
+        if [ ! -d "/persist/cache/camoufox/patchright" ]; then
           echo "Fetching Patchright browsers..."
           HOME=/home/user ${solverPython}/bin/python -m patchright install chromium
         fi
@@ -187,15 +185,14 @@ in
       ExecStart = startScript;
       Restart = "always";
       RestartSec = 5;
-      # StateDirectory removed - using user cache instead
       Environment = [
         "PORT=8001"
         "SOLVER_URL=http://localhost:8001"
         "VAULT_PATH=/mnt/data/swagwatch-engine/vault"
-        "CAMOUFOX_DIR=/home/user/.cache/camoufox"
+        "CAMOUFOX_DIR=/persist/cache/camoufox"
         "CAMOUFOX_SKIP_UPDATE=1"
-        # Tell Patchright/Playwright to look in our StateDirectory
-        "PLAYWRIGHT_BROWSERS_PATH=/home/user/.cache/camoufox/patchright"
+        # Tell Patchright/Playwright to look in our persisted cache directory
+        "PLAYWRIGHT_BROWSERS_PATH=/persist/cache/camoufox/patchright"
       ];
     };
   };

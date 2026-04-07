@@ -260,6 +260,7 @@ services.minio = {
       "/var/lib/qdrant"
       "/var/lib/animus"
       "/home/user/"
+      "/persist/cache"
     ];
     files = [
       "/etc/machine-id"

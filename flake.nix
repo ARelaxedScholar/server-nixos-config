@@ -23,7 +23,6 @@
         specialArgs = { inherit inputs animus; };
         modules = [
           ./configuration.nix
-          ./services/animus.nix
           disko.nixosModules.disko
           impermanence.nixosModules.impermanence
         ];
