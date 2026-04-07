@@ -32,6 +32,11 @@
     # Wait for the impermanence bind mount before starting
     requires = [ "var-lib-qdrant.mount" ];
     after = [ "var-lib-qdrant.mount" ];
+    unitConfig = {
+      # If the bind mount failed for any reason, skip the service rather than
+      # starting qdrant against the empty volatile directory.
+      ConditionPathIsMountPoint = "/var/lib/qdrant";
+    };
     serviceConfig = {
       # Disable DynamicUser so systemd doesn't try to manipulate the bind-mounted
       # StateDirectory (which causes exit code 238 / EXIT_STATE_DIRECTORY).

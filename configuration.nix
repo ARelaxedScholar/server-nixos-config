@@ -273,7 +273,7 @@ systemd.services.minio = {
       "/var/lib/tailscale"
       "/var/lib/postgresql"
       "/var/lib/minio"
-      "/var/lib/qdrant"
+      { directory = "/var/lib/qdrant"; user = "qdrant"; group = "qdrant"; mode = "0700"; }
       "/var/lib/animus"
       "/home/user/"
       "/persist/cache"
