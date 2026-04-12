@@ -25,7 +25,8 @@
   # Ensure the persistent source directory exists with the correct ownership
   # before impermanence establishes the bind mount.
   systemd.tmpfiles.rules = [
-    "d /persist/var/lib/redis 0700 redis redis -"
+    "d /persist/var/lib/redis            0700 redis redis -"
+    "d /persist/var/lib/redis/appendonlydir 0700 redis redis -"
   ];
 
   systemd.services.redis = {
