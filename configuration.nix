@@ -18,6 +18,7 @@ networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
     ./services/animus.nix
     ./services/headless-solver.nix
     ./services/qdrant.nix
+    ./services/redis.nix
   ];
 
 # PostgreSQL Configuration
@@ -274,6 +275,7 @@ systemd.services.minio = {
       "/var/lib/postgresql"
       "/var/lib/minio"
       { directory = "/var/lib/qdrant"; user = "qdrant"; group = "qdrant"; mode = "0700"; }
+      { directory = "/var/lib/redis"; user = "redis"; group = "redis"; mode = "0700"; }
       "/var/lib/animus"
       "/home/user/"
       "/persist/cache"
