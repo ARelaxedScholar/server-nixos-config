@@ -22,6 +22,7 @@ in
       QDRANT_COLLECTION = "swagwatch_index";
       PUBLIC_BASE_URL = "https://engine.swagwatch.app";
       RUST_LOG = "swagwatch_engine=info,sqlx=warn,qdrant_client=warn";
+      REDIS_URL = "redis://127.0.0.1:6379";
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
     };
 

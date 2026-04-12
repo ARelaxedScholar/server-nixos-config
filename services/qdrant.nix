@@ -4,6 +4,9 @@
   services.qdrant = {
     enable = true;
     settings = {
+      service = {
+        host = "0.0.0.0";
+      };
       storage = {
         # Keep the HNSW navigation graph in DDR3 RAM for fast vector search
         hnsw_index.on_disk = false;
