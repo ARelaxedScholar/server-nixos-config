@@ -46,6 +46,15 @@
       # Impermanence already provides /var/lib/redis; don't let systemd
       # manage (and potentially conflict with) the StateDirectory.
       StateDirectory = lib.mkForce "";
+      # StateDirectory="" removes the implicit ReadWritePaths for /var/lib/redis.
+      # The redis module sets ProtectSystem="strict", so without explicit
+      # ReadWritePaths the data directory is read-only and Redis fails to write
+      # AOF temp files (exit code 1, "Permission denied").
+      ReadWritePaths = [ "/var/lib/redis" "/run/redis" ];
+      # PrivateUsers=true (set by the redis module) creates a user namespace
+      # that can cause UID-mapping issues when combined with a static user and
+      # an impermanence bind mount.  Disable it here for a clean static-user setup.
+      PrivateUsers = lib.mkForce false;
     };
   };
 }
