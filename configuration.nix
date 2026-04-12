@@ -150,6 +150,8 @@ systemd.services.minio = {
     "flakes"
   ];
 
+  nix.settings.trusted-users = [ "root" "user" ];
+
   # --- Needed for boot stuff ---
   fileSystems."/persist".neededForBoot = true;
 
