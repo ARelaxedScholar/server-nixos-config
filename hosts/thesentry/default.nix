@@ -37,6 +37,19 @@ in
     AllowSuspendThenHibernate=no
   '';
 
+  services.tailscale.enable = true;
+
+  users.users.user = {
+    isNormalUser = true;
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com"
+    ];
+    extraGroups = [
+      "wheel"
+      "podman"
+    ];
+  };
+
   virtualisation.podman = {
     enable = true;
     dockerCompat = true;
