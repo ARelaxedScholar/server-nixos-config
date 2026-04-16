@@ -6,30 +6,49 @@
     disko.url = "github:nix-community/disko/latest";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     impermanence.url = "github:nix-community/impermanence";
+    animus.url = "github:ARelaxedScholar/Animus";
+    animus.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, disko, impermanence, ... }@inputs:
+  outputs =
+    {
+      nixpkgs,
+      disko,
+      impermanence,
+      animus,
+      ...
+    }@inputs:
     let
-      mkHost = modules:
+      mkHost =
+        {
+          modules,
+          extraSpecialArgs ? { },
+        }:
         nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
+          specialArgs = { inherit inputs; } // extraSpecialArgs;
           inherit modules;
         };
-    in {
+    in
+    {
       nixosConfigurations = {
-        swagwatch-engine = mkHost [
-          ./modules/common/base.nix
-          ./hosts/swagwatch-engine/default.nix
-          disko.nixosModules.disko
-          impermanence.nixosModules.impermanence
-        ];
+        swagwatch-engine = mkHost {
+          extraSpecialArgs = { inherit animus; };
+          modules = [
+            ./modules/common/base.nix
+            ./hosts/swagwatch-engine/default.nix
+            disko.nixosModules.disko
+            impermanence.nixosModules.impermanence
+          ];
+        };
 
-        thesentry = mkHost [
-          ./modules/common/base.nix
-          ./hosts/thesentry/default.nix
-          disko.nixosModules.disko
-        ];
+        thesentry = mkHost {
+          modules = [
+            ./modules/common/base.nix
+            ./hosts/thesentry/default.nix
+            disko.nixosModules.disko
+          ];
+        };
       };
     };
 }
