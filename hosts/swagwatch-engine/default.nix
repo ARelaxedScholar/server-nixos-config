@@ -136,7 +136,10 @@
         ${pkgs.zfs}/bin/zfs snapshot "$SNAP_NAME"
 
         echo "Starting ZFS replication for $SNAP_NAME..."
-        ${pkgs.zfs}/bin/zfs send -vR "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv datapool/backups/persist_mirror
+        ${pkgs.zfs}/bin/zfs send -vR "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv \
+          -x mountpoint -o mountpoint=none \
+          -x canmount -o canmount=off \
+          datapool/backups/persist_mirror
 
         ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation | grep "zroot/persist@backup_" | tail -n +32 | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy || true
         ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation | grep "datapool/backups/persist_mirror@backup_" | tail -n +32 | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy || true
