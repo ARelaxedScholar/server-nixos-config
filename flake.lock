@@ -9,14 +9,17 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-dBd3nt7YNmUz67O7/yk1DAn+f1pufGAYKKhxdrW6lhw=",
-        "path": "/home/user/Animus",
-        "type": "path"
+        "lastModified": 1774750759,
+        "narHash": "sha256-/dGb4CLCQBiCE0haEHXjhxmGCGSHTeSRXNSyGIRtgSs=",
+        "owner": "ARelaxedScholar",
+        "repo": "Animus",
+        "rev": "68c33cb63eb155af316744db63c6a5d0a26dc23a",
+        "type": "github"
       },
       "original": {
-        "path": "/home/user/Animus",
-        "type": "path"
+        "owner": "ARelaxedScholar",
+        "repo": "Animus",
+        "type": "github"
       }
     },
     "disko": {
