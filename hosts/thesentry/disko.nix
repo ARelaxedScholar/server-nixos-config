@@ -3,8 +3,8 @@
     disk = {
       system = {
         type = "disk";
-        # Replace with the real by-id path on thesentry before deployment.
-        device = "/dev/disk/by-id/REPLACE_WITH_THESENTRY_SYSTEM_DISK";
+        # Install thesentry onto the internal HDD identified by its stable WWN path.
+        device = "/dev/disk/by-id/wwn-0x50014ee65d825f45";
         content = {
           type = "gpt";
           partitions = {

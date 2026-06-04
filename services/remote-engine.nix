@@ -45,6 +45,12 @@ in
       # Disk Priority: Direct, high-speed access to the SSD
       IOWeight = 100;
 
+      # File descriptor limit: bump from default 1024 to hard limit.
+      # The engine's socket backlog is 4096, and scraping/discovery/search
+      # concurrently consume many FDs. Without this, cloudflared gets
+      # "connection refused" when the FD pool is exhausted.
+      LimitNOFILE = 524288;
+
       # ENV
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
