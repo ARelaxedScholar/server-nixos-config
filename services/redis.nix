@@ -6,11 +6,16 @@
     bind = "127.0.0.1";
     port = 6379;
     settings = {
-      # RDB snapshots: persist after N seconds if at least M keys changed
-      save = [ "900 1" "300 10" "60 10000" ];
+      # No RDB snapshots — AOF + appendfsync everysec already provides better
+      # durability (≤1s data loss on crash) without bgsave fork overhead.
+      save = "";
       # AOF for durability: every write is fsync'd at most once per second
       appendonly = "yes";
       appendfsync = "everysec";
+      # Safety net: if bgsave ever fails (e.g. ZFS permission drift on the
+      # impermanence bind mount), don't reject writes — AOF is the real
+      # durability mechanism, not RDB.
+      stop-writes-on-bgsave-error = false;
     };
   };
 
@@ -25,8 +30,11 @@
   # Ensure the persistent source directory exists with the correct ownership
   # before impermanence establishes the bind mount.
   systemd.tmpfiles.rules = [
-    "d /persist/var/lib/redis            0700 redis redis -"
-    "d /persist/var/lib/redis/appendonlydir 0700 redis redis -"
+    # Use 'Z' (recursive restore on every boot) instead of 'd' (create-once).
+    # Prevents ZFS ACL / permission drift over time that can cause Redis's
+    # forked child process (bgsave / AOF rewrite) to fail writing temp files.
+    "Z /persist/var/lib/redis            0700 redis redis -"
+    "Z /persist/var/lib/redis/appendonlydir 0700 redis redis -"
   ];
 
   systemd.services.redis = {
@@ -50,7 +58,10 @@
       # The redis module sets ProtectSystem="strict", so without explicit
       # ReadWritePaths the data directory is read-only and Redis fails to write
       # AOF temp files (exit code 1, "Permission denied").
-      ReadWritePaths = [ "/var/lib/redis" "/run/redis" ];
+      ReadWritePaths = [
+        "/var/lib/redis"
+        "/run/redis"
+      ];
       # PrivateUsers=true (set by the redis module) creates a user namespace
       # that can cause UID-mapping issues when combined with a static user and
       # an impermanence bind mount.  Disable it here for a clean static-user setup.
