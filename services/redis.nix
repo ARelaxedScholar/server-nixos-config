@@ -8,7 +8,7 @@
     settings = {
       # No RDB snapshots — AOF + appendfsync everysec already provides better
       # durability (≤1s data loss on crash) without bgsave fork overhead.
-      save = [];
+      save = [ ];
       # AOF for durability: every write is fsync'd at most once per second
       appendonly = "yes";
       appendfsync = "everysec";
