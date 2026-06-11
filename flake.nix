@@ -8,6 +8,8 @@
     impermanence.url = "github:nix-community/impermanence";
     animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
+    swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
+    swagwatch-engine.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -16,6 +18,7 @@
       disko,
       impermanence,
       animus,
+      swagwatch-engine,
       ...
     }@inputs:
     let
@@ -26,14 +29,17 @@
         }:
         nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs = { inherit inputs; } // extraSpecialArgs;
+          specialArgs = {
+            inherit inputs;
+          }
+          // extraSpecialArgs;
           inherit modules;
         };
     in
     {
       nixosConfigurations = {
         swagwatch-engine = mkHost {
-          extraSpecialArgs = { inherit animus; };
+          extraSpecialArgs = { inherit animus swagwatch-engine; };
           modules = [
             ./modules/common/base.nix
             ./hosts/swagwatch-engine/default.nix

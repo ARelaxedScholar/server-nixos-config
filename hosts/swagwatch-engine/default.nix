@@ -18,13 +18,30 @@
   networking.hostName = "swagwatch-engine";
   networking.hostId = "b4dc0ff3";
   networking.useDHCP = true;
-  networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
+  networking.nameservers = [
+    "1.1.1.1"
+    "8.8.8.8"
+  ];
 
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
   ];
-  nix.settings.trusted-users = [ "root" "user" ];
+  nix.settings.trusted-users = [
+    "root"
+    "user"
+  ];
+  nix.settings.auto-optimise-store = true;
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
+  };
+
+  programs.nh.clean = {
+    enable = true;
+    extraArgs = "--keep 5 --keep-since 14d";
+  };
 
   fileSystems."/persist".neededForBoot = true;
 
@@ -128,8 +145,17 @@
     serviceConfig = {
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "zfs-backup" ''
-        set -e
+        set -euo pipefail
         ${pkgs.zfs}/bin/zfs list datapool/backups >/dev/null 2>&1 || ${pkgs.zfs}/bin/zfs create datapool/backups
+
+        # Clear any resume token from a previous interrupted receive
+        ${pkgs.zfs}/bin/zfs receive -A datapool/backups/persist_mirror 2>/dev/null || true
+
+        # Prune destination snapshots BEFORE sending — ensures room for the incoming stream
+        ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation \
+          | grep "datapool/backups/persist_mirror@backup_" \
+          | tail -n +31 \
+          | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy -r 2>/dev/null || true
 
         TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
         SNAP_NAME="zroot/persist@backup_$TIMESTAMP"
@@ -140,12 +166,15 @@
           -o mountpoint=none -o canmount=off \
           datapool/backups/persist_mirror
 
-        ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation | grep "zroot/persist@backup_" | tail -n +32 | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy || true
-        ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation | grep "datapool/backups/persist_mirror@backup_" | tail -n +32 | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy || true
+        # Prune source after successful send
+        ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation \
+          | grep "zroot/persist@backup_" \
+          | tail -n +31 \
+          | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy -r 2>/dev/null || true
 
         echo "Backup complete. 76k garments secured."
       '';
-    }; 
+    };
   };
 
   systemd.timers.zfs-backup-persist = {
@@ -209,8 +238,18 @@
       "/var/lib/tailscale"
       "/var/lib/postgresql"
       "/var/lib/minio"
-      { directory = "/var/lib/qdrant"; user = "qdrant"; group = "qdrant"; mode = "0700"; }
-      { directory = "/var/lib/redis"; user = "redis"; group = "redis"; mode = "0700"; }
+      {
+        directory = "/var/lib/qdrant";
+        user = "qdrant";
+        group = "qdrant";
+        mode = "0700";
+      }
+      {
+        directory = "/var/lib/redis";
+        user = "redis";
+        group = "redis";
+        mode = "0700";
+      }
       "/var/lib/animus"
       "/home/user/"
       "/persist/cache"

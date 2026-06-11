@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, swagwatch-engine, ... }:
 
 let
   engineFlakePath = "/mnt/data/swagwatch-engine";
@@ -26,7 +26,12 @@ in
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
     };
 
-    path = with pkgs; [ nodejs_22 chromium which git ];
+    path = with pkgs; [
+      nodejs_22
+      chromium
+      which
+      git
+    ];
 
     serviceConfig = {
       Type = "simple";
@@ -35,13 +40,13 @@ in
 
       # --- THE VIP RESOURCE BOUNDS ---
       # Give the scraper breathing room, but protect the 32GB host
-      MemoryHigh = "8G";         # Start throttling here
-      MemoryMax = "12G";         # Absolute kill limit
-    
+      MemoryHigh = "8G"; # Start throttling here
+      MemoryMax = "12G"; # Absolute kill limit
+
       # Priority: Negative 'Nice' means SwagWatch gets CPU priority over Animus
-      Nice = -5;                 
-      CPUSchedulingPolicy = "rr"; 
-    
+      Nice = -5;
+      CPUSchedulingPolicy = "rr";
+
       # Disk Priority: Direct, high-speed access to the SSD
       IOWeight = 100;
 
@@ -54,7 +59,7 @@ in
       # ENV
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
-      ExecStart = "${pkgs.nix}/bin/nix run git+file://${engineFlakePath}#default";
+      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch-engine";
       Restart = "always";
       RestartSec = "5s";
     };
