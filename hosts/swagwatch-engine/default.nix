@@ -103,6 +103,10 @@
 
   services.tailscale.enable = true;
 
+  services.journald.extraConfig = ''
+    SystemMaxUse=500M
+  '';
+
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_18;
@@ -140,8 +144,65 @@
     unitConfig.ConditionPathIsMountPoint = "/var/lib/postgresql";
   };
 
+  # Generic failure alarm: attach with unitConfig.OnFailure = [ "notify-failure@%p.service" ];
+  # Alerts persist in /persist/var/lib/failure-alerts.log and are shown on every
+  # interactive login until the file is truncated. For phone push, write a ntfy
+  # topic URL (e.g. https://ntfy.sh/<random-secret-topic>) to
+  # /persist/etc/secrets/alert-webhook-url and subscribe to it in the ntfy app.
+  systemd.services."notify-failure@" = {
+    description = "Failure alert for %i";
+    serviceConfig.Type = "oneshot";
+    scriptArgs = "%i";
+    script = ''
+      UNIT="$1"
+      MSG="[$(uname -n)] $(date -Is) systemd unit FAILED: $UNIT"
+      echo "$MSG" | ${pkgs.systemd}/bin/systemd-cat -t failure-alert -p emerg
+      echo "$MSG" >> /persist/var/lib/failure-alerts.log
+      ${pkgs.util-linux}/bin/wall "$MSG" 2>/dev/null || true
+      if [ -r /persist/etc/secrets/alert-webhook-url ]; then
+        ${pkgs.curl}/bin/curl -fsS -m 10 -d "$MSG" "$(cat /persist/etc/secrets/alert-webhook-url)" || true
+      fi
+    '';
+  };
+
+  environment.interactiveShellInit = ''
+    if [ -s /persist/var/lib/failure-alerts.log ]; then
+      printf '\033[1;31m=== UNRESOLVED FAILURE ALERTS (clear: sudo truncate -s0 /persist/var/lib/failure-alerts.log) ===\033[0m\n'
+      tail -n 5 /persist/var/lib/failure-alerts.log
+    fi
+  '';
+
+  # Early warning before a full pool starts breaking services
+  systemd.services.zpool-capacity-check = {
+    description = "Alert when a zpool crosses 80% capacity";
+    serviceConfig.Type = "oneshot";
+    unitConfig.OnFailure = [ "notify-failure@%p.service" ];
+    script = ''
+      FULL=0
+      while read -r POOL CAP; do
+        CAP=''${CAP%"%"}
+        if [ "$CAP" -ge 80 ]; then
+          echo "zpool $POOL is at $CAP% capacity" | ${pkgs.systemd}/bin/systemd-cat -t failure-alert -p warning
+          echo "[$(uname -n)] $(date -Is) zpool $POOL at $CAP% capacity" >> /persist/var/lib/failure-alerts.log
+          FULL=1
+        fi
+      done < <(${pkgs.zfs}/bin/zpool list -H -o name,capacity)
+      exit $FULL
+    '';
+  };
+
+  systemd.timers.zpool-capacity-check = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "hourly";
+      Persistent = true;
+      Unit = "zpool-capacity-check.service";
+    };
+  };
+
   systemd.services.zfs-backup-persist = {
     description = "Backup persist dataset to datapool storage";
+    unitConfig.OnFailure = [ "notify-failure@%p.service" ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "zfs-backup" ''
@@ -161,16 +222,35 @@
         SNAP_NAME="zroot/persist@backup_$TIMESTAMP"
         ${pkgs.zfs}/bin/zfs snapshot "$SNAP_NAME"
 
-        echo "Starting ZFS replication for $SNAP_NAME..."
-        ${pkgs.zfs}/bin/zfs send -vR "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv \
-          -o mountpoint=none -o canmount=off \
-          datapool/backups/persist_mirror
+        # Incremental send from the newest snapshot present on both sides.
+        # No -R: a replicated stream received with -F would destroy destination
+        # snapshots that were pruned on the source, defeating the 30-day
+        # retention on datapool while we keep only 2 on zroot.
+        COMMON=""
+        for dest_snap in $(${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation -d1 datapool/backups/persist_mirror 2>/dev/null | cut -d@ -f2); do
+          if ${pkgs.zfs}/bin/zfs list "zroot/persist@$dest_snap" >/dev/null 2>&1; then
+            COMMON="$dest_snap"
+            break
+          fi
+        done
 
-        # Prune source after successful send
+        echo "Starting ZFS replication for $SNAP_NAME (incremental from: ''${COMMON:-none, full send})..."
+        if [ -n "$COMMON" ]; then
+          ${pkgs.zfs}/bin/zfs send -v -I "@$COMMON" "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv \
+            -o mountpoint=none -o canmount=off \
+            datapool/backups/persist_mirror
+        else
+          ${pkgs.zfs}/bin/zfs send -v "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv \
+            -o mountpoint=none -o canmount=off \
+            datapool/backups/persist_mirror
+        fi
+
+        # Keep only the 2 newest snapshots on the cramped source pool;
+        # the 30-day history lives on datapool/backups/persist_mirror.
         ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation \
           | grep "zroot/persist@backup_" \
-          | tail -n +31 \
-          | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy -r 2>/dev/null || true
+          | tail -n +3 \
+          | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy 2>/dev/null || true
 
         echo "Backup complete. 76k garments secured."
       '';
