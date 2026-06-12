@@ -9,7 +9,6 @@
     animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
-    swagwatch-engine.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
