@@ -9,8 +9,14 @@ in
   systemd.services.remote-engine = {
     description = "SwagWatch Remote Engine";
     wantedBy = [ "multi-user.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
+    after = [
+      "network-online.target"
+      "moondream.service"
+    ];
+    wants = [
+      "network-online.target"
+      "moondream.service"
+    ];
     unitConfig.ConditionPathExists = envFile;
 
     environment = {
@@ -24,7 +30,9 @@ in
       RUST_LOG = "swagwatch_engine=info,sqlx=warn,qdrant_client=warn";
       REDIS_URL = "redis://127.0.0.1:6379";
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
-      MOONDREAM_URL = "http://127.0.0.1:8002";
+      # Tell the caption worker where to find Moondream (via Ollama)
+      # Port 11434 is hardcoded in ollama.rs, hostname only here
+      OLLAMA_HOST = "http://127.0.0.1";
     };
 
     path = with pkgs; [

@@ -292,11 +292,10 @@
 
   services.moondream = {
     enable = true;
-    # Q4_K_M: good balance of quality and memory (~4-6GB VRAM)
-    hfRepo = "moondream/moondream2-gguf:Q4_K_M";
-    port = 8002;
-    # Persist downloaded GGUF across reboots
-    modelDir = "/persist/cache/llama-models";
+    # Model and host/port defaults match what swagwatch-engine expects
+    # (model = "moondream", host = "127.0.0.1", port = 11434)
+    # Persist downloaded models across reboots
+    modelDir = "/persist/cache/ollama";
   };
 
   virtualisation.docker = {

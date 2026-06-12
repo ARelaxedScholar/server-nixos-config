@@ -1,99 +1,97 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.services.moondream;
 in
 {
   options.services.moondream = {
-    enable = lib.mkEnableOption "Moondream captioning model via llama.cpp";
+    enable = lib.mkEnableOption "Moondream captioning model (via Ollama)";
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.llama-cpp;
-      defaultText = lib.literalExpression "pkgs.llama-cpp";
-      description = "llama.cpp package to use for serving Moondream";
+      default = pkgs.ollama;
+      defaultText = lib.literalExpression "pkgs.ollama";
+      description = "Ollama package to use for serving Moondream";
     };
 
-    hfRepo = lib.mkOption {
+    model = lib.mkOption {
       type = lib.types.str;
-      default = "moondream/moondream2-gguf:Q4_K_M";
+      default = "moondream";
       description = ''
-        Hugging Face model repository for the Moondream GGUF model.
-        Format: <user>/<model>[:quant] (e.g., "moondream/moondream2-gguf:Q4_K_M")
+        Ollama model tag to pull and serve.
+        Defaults to "moondream" which is what swagwatch-engine expects.
       '';
-      example = "moondream/moondream2-gguf:Q8_0";
-    };
-
-    hfFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = ''
-        Specific Hugging Face model file name. If set, overrides the quant
-        suffix in hfRepo. Useful when the repo has non-standard filenames.
-      '';
-      example = "moondream2-Q4_K_M.gguf";
+      example = "moondream:latest";
     };
 
     port = lib.mkOption {
       type = lib.types.port;
-      default = 8002;
-      description = "Port for the Moondream captioning API server";
+      default = 11434;
+      description = "Port for the Ollama API server (engine hardcodes 11434)";
     };
 
     host = lib.mkOption {
       type = lib.types.str;
       default = "127.0.0.1";
-      description = "Bind address (use 127.0.0.1 for local-only, 0.0.0.0 for network access)";
+      description = "Bind address";
     };
 
     modelDir = lib.mkOption {
       type = lib.types.path;
-      default = "/persist/cache/llama-models";
-      description = "Directory to cache downloaded GGUF models in";
+      default = "/persist/cache/ollama";
+      description = "Directory where Ollama stores downloaded models";
     };
 
-    contextSize = lib.mkOption {
-      type = lib.types.ints.positive;
-      default = 8192;
-      description = "Context size (--ctx-size) for the model";
-    };
-
-    layers = lib.mkOption {
-      type = lib.types.ints.unsigned;
-      default = 99;
-      description = "Number of layers to offload to GPU (-ngl). 99 = all layers";
-    };
-
-    extraArgs = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "Additional arguments passed directly to llama-server";
-      example = [ "--no-mmap" ];
+    keepAlive = lib.mkOption {
+      type = lib.types.str;
+      default = "5m";
+      description = ''
+        How long to keep the model loaded in memory after last use.
+        "5m" means 5 minutes; "24h" for always-hot; "0" for unload immediately.
+      '';
+      example = "24h";
     };
 
     user = lib.mkOption {
       type = lib.types.str;
       default = "user";
-      description = "System user to run the Moondream server as";
+      description = "System user to run the Ollama server as";
+    };
+
+    extraEnv = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      description = "Additional environment variables for the ollama server";
+      example = {
+        OLLAMA_NUM_PARALLEL = "4";
+        OLLAMA_MAX_LOADED_MODELS = "2";
+      };
     };
   };
 
   config = lib.mkIf cfg.enable {
-    # Model cache directory persisted via impermanence
+    # Model storage directory — already under /persist/cache which is persisted
     systemd.tmpfiles.rules = [
       "d ${cfg.modelDir} 0755 ${cfg.user} users -"
     ];
 
     systemd.services.moondream = {
-      description = "Moondream captioning model server (llama.cpp)";
+      description = "Moondream captioning model server (Ollama)";
       wantedBy = [ "multi-user.target" ];
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
 
-      # Tell llama.cpp where to cache downloaded models
       environment = {
-        LLAMA_ARG_MODEL_DIR = cfg.modelDir;
-      };
+        OLLAMA_HOST = "${cfg.host}:${toString cfg.port}";
+        OLLAMA_MODELS = cfg.modelDir;
+        OLLAMA_KEEP_ALIVE = cfg.keepAlive;
+      }
+      // cfg.extraEnv;
 
       serviceConfig = {
         Type = "simple";
@@ -102,20 +100,11 @@ in
         RestartSec = "10s";
         MemoryMax = "6G";
 
-        ExecStart = lib.escapeShellArgs (
-          [
-            "${cfg.package}/bin/llama-server"
-            "--hf-repo" cfg.hfRepo
-            "--host" cfg.host
-            "--port" (toString cfg.port)
-            "--mmproj-auto"
-            "--mlock"
-            "-ngl" (toString cfg.layers)
-            "-c" (toString cfg.contextSize)
-          ] ++ lib.optionals (cfg.hfFile != null) [
-            "--hf-file" cfg.hfFile
-          ] ++ cfg.extraArgs
-        );
+        ExecStart = "${cfg.package}/bin/ollama serve";
+
+        # Pre-pull the Moondream model on first start so the engine
+        # never waits for a download when it submits a caption job.
+        ExecStartPre = "${cfg.package}/bin/ollama pull ${cfg.model}";
       };
     };
   };
