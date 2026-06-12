@@ -24,6 +24,7 @@ in
       RUST_LOG = "swagwatch_engine=info,sqlx=warn,qdrant_client=warn";
       REDIS_URL = "redis://127.0.0.1:6379";
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
+      MOONDREAM_URL = "http://127.0.0.1:8002";
     };
 
     path = with pkgs; [

@@ -13,6 +13,7 @@
     ../../services/headless-solver.nix
     ../../services/qdrant.nix
     ../../services/redis.nix
+    ../../services/moondream.nix
   ];
 
   networking.hostName = "swagwatch-engine";
@@ -287,6 +288,15 @@
   services.animus = {
     enable = true;
     envFile = /persist/etc/secrets/animus.env;
+  };
+
+  services.moondream = {
+    enable = true;
+    # Q4_K_M: good balance of quality and memory (~4-6GB VRAM)
+    hfRepo = "moondream/moondream2-gguf:Q4_K_M";
+    port = 8002;
+    # Persist downloaded GGUF across reboots
+    modelDir = "/persist/cache/llama-models";
   };
 
   virtualisation.docker = {
