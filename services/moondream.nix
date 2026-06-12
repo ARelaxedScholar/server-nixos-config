@@ -102,9 +102,11 @@ in
 
         ExecStart = "${cfg.package}/bin/ollama serve";
 
-        # Pre-pull the Moondream model on first start so the engine
-        # never waits for a download when it submits a caption job.
-        ExecStartPre = "${cfg.package}/bin/ollama pull ${cfg.model}";
+        # Pull the model after the server starts (ollama pull connects to
+        # the running server on localhost:11434). Best-effort — if the
+        # network is down on first boot, the engine's caption worker will
+        # trigger the pull naturally when it needs the model.
+        ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 3 && ${cfg.package}/bin/ollama pull ${cfg.model} || true'";
       };
     };
   };
