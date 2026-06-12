@@ -68,7 +68,7 @@ in
       # ENV
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
-      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch-engine";
+      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
       Restart = "always";
       RestartSec = "5s";
     };
