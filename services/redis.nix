@@ -41,6 +41,10 @@
     # Wait for the impermanence bind mount before starting
     requires = [ "var-lib-redis.mount" ];
     after = [ "var-lib-redis.mount" ];
+    # Large AOF base RDB (~5.7 GB) needs more than the default 90s to load.
+    # 5 min is safe for the current data size; bump if it keeps growing.
+    startLimitIntervalSec = 0; # Don't give up after repeated timeouts
+    unitConfig.TimeoutStartSec = 300;
     unitConfig = {
       # Skip the service if the bind mount failed rather than starting Redis
       # against an empty volatile directory and losing all data.
