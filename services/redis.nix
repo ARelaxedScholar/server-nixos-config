@@ -49,7 +49,13 @@
       # Skip the service if the bind mount failed rather than starting Redis
       # against an empty volatile directory and losing all data.
       ConditionPathIsMountPoint = "/var/lib/redis";
+      # Large AOF base RDB (~5.7 GB) + 10 days of AOF diff replay needs
+      # more than the default 90s.  The base loaded in 37s; the AOF diff
+      # is the bottleneck.  10 min to cover both.
+      TimeoutStartSec = 600;
     };
+    # Don't give up after repeated timeouts during large AOF replay
+    startLimitIntervalSec = 0;
     serviceConfig = {
       # Disable DynamicUser so systemd doesn't fight the bind-mounted directory
       DynamicUser = lib.mkForce false;
