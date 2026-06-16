@@ -129,11 +129,8 @@ in
         RestartSec = "5s";
         MemoryMax = "4G";
         # Hardening
-        NoNewPrivileges = true;
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        PrivateTmp = true;
         ReadWritePaths = [ cfg.stateDir ] ++ lib.optional (cfg.envFile != null) cfg.envFile;
+        # hardening skipped - conflicts with hermes binary sandboxing
       };
     };
 

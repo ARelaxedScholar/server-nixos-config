@@ -8,7 +8,7 @@
     impermanence.url = "github:nix-community/impermanence";
     animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
-    llm-agents.url = "github:numtide/llm-agents.nix";
+    llm-agents.url =                                                                                                "git+https://github.com/numtide/llm-agents.nix?rev=53673313e86582f3ac7050ff826158fd843c219d";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
   };
 
