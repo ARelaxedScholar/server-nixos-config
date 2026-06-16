@@ -34,6 +34,13 @@
     "user"
   ];
   nix.settings.auto-optimise-store = true;
+  nix.settings.substituters = [
+    "https://cache.numtide.com"
+    "https://cache.nixos.org"
+  ];
+  nix.settings.trusted-public-keys = [
+    "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16Z+Qa2n8ixLSSQ8="
+  ];
   nix.gc = {
     automatic = true;
     dates = "weekly";

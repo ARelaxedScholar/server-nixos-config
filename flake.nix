@@ -8,7 +8,7 @@
     impermanence.url = "github:nix-community/impermanence";
     animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
-    hermes-agent.url =                                                                              "git+https://github.com/NousResearch/hermes-agent?rev=2483200963e43e7335e02f3f51440db089bcc1a3";
+    llm-agents.url = "github:numtide/llm-agents.nix";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
   };
 
@@ -18,7 +18,7 @@
       disko,
       impermanence,
       animus,
-      hermes-agent,
+      llm-agents,
       swagwatch-engine,
       ...
     }@inputs:
@@ -40,7 +40,7 @@
     {
       nixosConfigurations = {
         swagwatch-engine = mkHost {
-          extraSpecialArgs = { inherit animus hermes-agent swagwatch-engine; };
+          extraSpecialArgs = { inherit animus llm-agents swagwatch-engine; };
           modules = [
             ./modules/common/base.nix
             ./hosts/swagwatch-engine/default.nix
