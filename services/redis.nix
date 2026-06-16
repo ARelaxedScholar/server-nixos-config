@@ -5,13 +5,13 @@
     enable = true;
     bind = "127.0.0.1";
     port = 6379;
+    # No RDB snapshots — AOF + appendfsync everysec already provides better
+    # durability (≤1s data loss on crash) without bgsave fork overhead.
+    save = [ ];
+    # AOF for durability: every write is fsync'd at most once per second.
+    appendOnly = true;
+    appendFsync = "everysec";
     settings = {
-      # No RDB snapshots — AOF + appendfsync everysec already provides better
-      # durability (≤1s data loss on crash) without bgsave fork overhead.
-      save = [ ];
-      # AOF for durability: every write is fsync'd at most once per second
-      appendonly = "yes";
-      appendfsync = "everysec";
       # Safety net: if bgsave ever fails (e.g. ZFS permission drift on the
       # impermanence bind mount), don't reject writes — AOF is the real
       # durability mechanism, not RDB.
@@ -41,22 +41,18 @@
     # Wait for the impermanence bind mount before starting
     requires = [ "var-lib-redis.mount" ];
     after = [ "var-lib-redis.mount" ];
-    # Large AOF base RDB (~5.7 GB) needs more than the default 90s to load.
-    # 5 min is safe for the current data size; bump if it keeps growing.
-    startLimitIntervalSec = 0; # Don't give up after repeated timeouts
-    unitConfig.TimeoutStartSec = 300;
     unitConfig = {
       # Skip the service if the bind mount failed rather than starting Redis
       # against an empty volatile directory and losing all data.
       ConditionPathIsMountPoint = "/var/lib/redis";
-      # Large AOF base RDB (~5.7 GB) + 10 days of AOF diff replay needs
-      # more than the default 90s.  The base loaded in 37s; the AOF diff
-      # is the bottleneck.  10 min to cover both.
-      TimeoutStartSec = 600;
     };
     # Don't give up after repeated timeouts during large AOF replay
     startLimitIntervalSec = 0;
     serviceConfig = {
+      # Large AOF base RDB (~5.7 GB) + accumulated AOF diff replay can exceed
+      # the default 90s.  This belongs in [Service], not [Unit].
+      TimeoutStartSec = lib.mkForce 1800;
+      TimeoutStopSec = lib.mkForce 600;
       # Disable DynamicUser so systemd doesn't fight the bind-mounted directory
       DynamicUser = lib.mkForce false;
       User = "redis";
