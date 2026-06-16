@@ -14,6 +14,7 @@
     ../../services/qdrant.nix
     ../../services/redis.nix
     ../../services/moondream.nix
+    ../../services/hermes.nix
   ];
 
   networking.hostName = "swagwatch-engine";
@@ -293,6 +294,12 @@
     envFile = /persist/etc/secrets/animus.env;
   };
 
+  services.hermes = {
+    enable = true;
+    envFile = "/persist/etc/secrets/hermes.env";
+    # model = "anthropic/claude-sonnet-4";  # override if you prefer another model
+  };
+
   services.moondream = {
     enable = true;
     # Model and host/port defaults match what swagwatch-engine expects
@@ -344,6 +351,7 @@
       }
       "/var/lib/animus"
       "/home/user/"
+      # hermes-agent state dirs are managed internally by the NixOS module
       "/persist/cache"
     ];
     files = [
@@ -361,6 +369,7 @@
     chromium
     nh
     llama-cpp
+    nvtop
   ];
 
   programs.nix-ld.enable = true;

@@ -8,6 +8,7 @@
     impermanence.url = "github:nix-community/impermanence";
     animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
   };
 
@@ -38,7 +39,7 @@
     {
       nixosConfigurations = {
         swagwatch-engine = mkHost {
-          extraSpecialArgs = { inherit animus swagwatch-engine; };
+          extraSpecialArgs = { inherit animus hermes-agent swagwatch-engine; };
           modules = [
             ./modules/common/base.nix
             ./hosts/swagwatch-engine/default.nix
