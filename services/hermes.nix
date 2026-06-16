@@ -108,7 +108,7 @@ in
           if [ "${cfg.envFile}" != "$HERMES_HOME/.env" ]; then
             cp "${cfg.envFile}" "$HERMES_HOME/.env"
           fi
-          chmod 0600 "$HERMES_HOME/.env"
+          chmod 0644 "$HERMES_HOME/.env"
         fi
       '';
     };

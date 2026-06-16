@@ -1,4 +1,10 @@
-{ pkgs, weaver, lib, config, ... }:
+{
+  pkgs,
+  weaver,
+  lib,
+  config,
+  ...
+}:
 let
   cfg = config.services.weaver;
 
@@ -10,6 +16,11 @@ let
     src = weaver;
     pyproject = true;
     build-system = [ pkgs.python3Packages.setuptools ];
+    nativeBuildInputs = [ pkgs.python3Packages.pythonRelaxDepsHook ];
+    pythonRelaxDeps = [
+      "pillow"
+      "structlog"
+    ];
     dependencies = with pkgs.python3Packages; [
       httpx
       pillow
@@ -117,7 +128,8 @@ in
     systemd.services = lib.mkMerge [
       { "weaver-pseo" = mkService "Weaver - SwagWatch pSEO marketing bot (one-shot)" "--run-once"; }
       (lib.mkIf cfg.enableIntelligence {
-        "weaver-intelligence" = mkService "Weaver Intelligence - B2B content factory (one-shot)" "--intelligence";
+        "weaver-intelligence" =
+          mkService "Weaver Intelligence - B2B content factory (one-shot)" "--intelligence";
       })
       (lib.mkIf cfg.enableLeadgen {
         "weaver-leadgen" = mkService "Weaver Lead-gen - qualify + draft outreach (one-shot)" "--leadgen";
