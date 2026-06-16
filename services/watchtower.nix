@@ -35,7 +35,7 @@ in
       description = ''
         Path to an EnvironmentFile with secrets (not tracked in git). Should set at
         least DATABASE_URL and WATCHTOWER_CONFIG, plus any optional integration
-        tokens (GITHUB_TOKEN, WATCHTOWER_DEEPSEEK_API_KEY, WATCHTOWER_TELEGRAM_*).
+        tokens (GITHUB_TOKEN, HERMES_GATEWAY_URL, HERMES_AUTH_TOKEN, WATCHTOWER_TELEGRAM_*).
         For local peer auth use: DATABASE_URL=postgres:///watchtower?host=/run/postgresql
       '';
       example = "/persist/etc/secrets/watchtower.env";
