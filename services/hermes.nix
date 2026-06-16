@@ -99,12 +99,6 @@ in
 
         mkdir -p "$HERMES_HOME"
 
-        # Fix perms on everything inside HERMES_HOME.
-        # hermes config --init can create dirs/files with 0700, and impermanence
-        # preserves that across reboots. Run this before touching anything.
-        find "$HERMES_HOME" -type d -exec chmod 0755 {} +
-        find "$HERMES_HOME" -type f -exec chmod 0644 {} +
-
         # Generate config.yaml if it doesn't exist
         if [ ! -f "$HERMES_HOME/config.yaml" ]; then
           ${hermesPkg}/bin/hermes config --init 2>/dev/null || true
@@ -115,8 +109,13 @@ in
           if [ "${cfg.envFile}" != "$HERMES_HOME/.env" ]; then
             cp "${cfg.envFile}" "$HERMES_HOME/.env"
           fi
-          chmod 0644 "$HERMES_HOME/.env"
         fi
+
+        # Fix perms — must run AFTER hermes config --init, which
+        # recreates .hermes with 0700. Impermanence also preserves
+        # stale perms across reboots.
+        find "$HERMES_HOME" -type d -exec chmod 0755 {} +
+        find "$HERMES_HOME" -type f -exec chmod 0644 {} +
       '';
     };
 
