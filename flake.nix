@@ -10,6 +10,16 @@
     animus.inputs.nixpkgs.follows = "nixpkgs";
     llm-agents.url =                                                                                                "git+https://github.com/numtide/llm-agents.nix?rev=53673313e86582f3ac7050ff826158fd843c219d";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
+
+    # Watchtower ships its own flake (Rust); use its package output.
+    watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
+
+    # Weaver has no flake (pure-Python); fetch as a plain source tree and build
+    # it in services/weaver.nix.
+    weaver = {
+      url = "git+ssh://git@gitlab.com/swagwatch/growth/weaver.git";
+      flake = false;
+    };
   };
 
   outputs =
@@ -20,6 +30,8 @@
       animus,
       llm-agents,
       swagwatch-engine,
+      watchtower,
+      weaver,
       ...
     }@inputs:
     let
@@ -40,7 +52,7 @@
     {
       nixosConfigurations = {
         swagwatch-engine = mkHost {
-          extraSpecialArgs = { inherit animus llm-agents swagwatch-engine; };
+          extraSpecialArgs = { inherit animus llm-agents swagwatch-engine watchtower weaver; };
           modules = [
             ./modules/common/base.nix
             ./hosts/swagwatch-engine/default.nix

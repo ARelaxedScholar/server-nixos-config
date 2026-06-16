@@ -16,6 +16,8 @@
     ../../services/moondream.nix
     ../../services/hermes.nix
     ../../services/homelab-health.nix
+    ../../services/watchtower.nix
+    ../../services/weaver.nix
   ];
 
   networking.hostName = "swagwatch-engine";
@@ -126,6 +128,7 @@
     ensureDatabases = [
       "animus"
       "swagwatch"
+      "watchtower"
     ];
     ensureUsers = [
       {
@@ -134,6 +137,10 @@
       }
       {
         name = "swagwatch";
+        ensureDBOwnership = true;
+      }
+      {
+        name = "watchtower";
         ensureDBOwnership = true;
       }
     ];
@@ -308,6 +315,18 @@
     # model = "anthropic/claude-sonnet-4";  # override if you prefer another model
   };
 
+  services.watchtower = {
+    enable = true;
+    envFile = /persist/etc/secrets/watchtower.env;
+  };
+
+  services.weaver = {
+    enable = true;
+    envFile = /persist/etc/secrets/weaver.env;
+    enableIntelligence = true;
+    enableLeadgen = true;
+  };
+
   services.homelabHealth = {
     enable = true;
     healthUrls = [
@@ -374,6 +393,18 @@
         mode = "0700";
       }
       "/var/lib/animus"
+      {
+        directory = "/var/lib/watchtower";
+        user = "watchtower";
+        group = "watchtower";
+        mode = "0750";
+      }
+      {
+        directory = "/var/lib/weaver";
+        user = "weaver";
+        group = "weaver";
+        mode = "0750";
+      }
       "/home/user/"
       # hermes-agent state dirs are managed internally by the NixOS module
       "/persist/cache"
