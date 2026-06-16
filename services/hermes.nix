@@ -78,7 +78,8 @@ in
 
     systemd.tmpfiles.rules = [
       "d ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
-      "d ${cfg.stateDir}/.hermes 0755 ${cfg.user} ${cfg.group} -"
+      # z = set perms on existing dirs too (impermanence can leave stale 0700)
+      "z ${cfg.stateDir}/.hermes 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/workspace 0755 ${cfg.user} ${cfg.group} -"
     ];
 
@@ -97,6 +98,12 @@ in
         export HERMES_HOME
 
         mkdir -p "$HERMES_HOME"
+
+        # Fix perms on everything inside HERMES_HOME.
+        # hermes config --init can create dirs/files with 0700, and impermanence
+        # preserves that across reboots. Run this before touching anything.
+        find "$HERMES_HOME" -type d -exec chmod 0755 {} +
+        find "$HERMES_HOME" -type f -exec chmod 0644 {} +
 
         # Generate config.yaml if it doesn't exist
         if [ ! -f "$HERMES_HOME/config.yaml" ]; then
