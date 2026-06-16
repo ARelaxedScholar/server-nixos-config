@@ -72,7 +72,6 @@ in
       "d ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/.hermes 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/workspace 0755 ${cfg.user} ${cfg.group} -"
-      "d ${cfg.stateDir}/home 0755 ${cfg.user} ${cfg.group} -"
     ];
 
     # Generate config.yaml from declarative settings
@@ -114,10 +113,7 @@ in
       wants = [ "network-online.target" ];
       requires = [ "hermes-init-config.service" ];
 
-      environment = {
-        HERMES_HOME = "${cfg.stateDir}/.hermes";
-        HERMES_MANAGED = "true";
-      };
+      environment.HERMES_HOME = "${cfg.stateDir}/.hermes";
 
       serviceConfig = {
         Type = "simple";
@@ -127,10 +123,6 @@ in
         WorkingDirectory = "${cfg.stateDir}/workspace";
         Restart = "on-failure";
         RestartSec = "5s";
-        MemoryMax = "4G";
-        # Hardening
-        ReadWritePaths = [ cfg.stateDir ] ++ lib.optional (cfg.envFile != null) cfg.envFile;
-        # hardening skipped - conflicts with hermes binary sandboxing
       };
     };
 
