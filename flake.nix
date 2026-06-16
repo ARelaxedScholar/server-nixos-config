@@ -18,6 +18,7 @@
       disko,
       impermanence,
       animus,
+      hermes-agent,
       swagwatch-engine,
       ...
     }@inputs:
