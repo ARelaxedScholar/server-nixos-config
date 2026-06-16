@@ -9,6 +9,7 @@ in
     ./hardware-configuration.nix
     ./disko.nix
     ../../services/homelab-health.nix
+    ../../services/hermes.nix
   ];
 
   networking.hostName = "thesentry";
@@ -39,6 +40,15 @@ in
   '';
 
   services.tailscale.enable = true;
+
+  services.hermes = {
+    enable = true;
+    manageUser = false;
+    user = "user";
+    group = "user";
+    stateDir = "/home/user";
+    envFile = "/home/user/.hermes/.env";
+  };
 
   users.users.user = {
     isNormalUser = true;

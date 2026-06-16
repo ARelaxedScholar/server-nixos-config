@@ -62,6 +62,7 @@
         };
 
         thesentry = mkHost {
+          extraSpecialArgs = { inherit llm-agents; };
           modules = [
             ./modules/common/base.nix
             ./hosts/thesentry/default.nix

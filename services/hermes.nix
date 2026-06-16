@@ -13,6 +13,12 @@ in
   options.services.hermes = {
     enable = lib.mkEnableOption "Hermes Agent (Nous Research autonomous agent framework)";
 
+    manageUser = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Whether this module should create/manage the service user and group";
+    };
+
     envFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
@@ -51,14 +57,16 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    users.users.${cfg.user} = {
-      isSystemUser = true;
-      group = cfg.group;
-      description = "Hermes Agent service user";
-      home = cfg.stateDir;
-      createHome = true;
+    users = lib.mkIf cfg.manageUser {
+      users.${cfg.user} = {
+        isSystemUser = true;
+        group = cfg.group;
+        description = "Hermes Agent service user";
+        home = cfg.stateDir;
+        createHome = true;
+      };
+      groups.${cfg.group} = { };
     };
-    users.groups.${cfg.group} = { };
 
     # Make hermes CLI available on PATH
     environment.systemPackages = [ hermesPkg ];
@@ -97,7 +105,9 @@ in
 
         # Merge env file
         if [ -n "${cfg.envFile}" ] && [ -f "${cfg.envFile}" ]; then
-          cp "${cfg.envFile}" "$HERMES_HOME/.env"
+          if [ "${cfg.envFile}" != "$HERMES_HOME/.env" ]; then
+            cp "${cfg.envFile}" "$HERMES_HOME/.env"
+          fi
           chmod 0600 "$HERMES_HOME/.env"
         fi
       '';
