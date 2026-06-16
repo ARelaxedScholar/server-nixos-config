@@ -15,6 +15,7 @@
     ../../services/redis.nix
     ../../services/moondream.nix
     ../../services/hermes.nix
+    ../../services/homelab-health.nix
   ];
 
   networking.hostName = "swagwatch-engine";
@@ -305,6 +306,22 @@
     enable = true;
     envFile = "/persist/etc/secrets/hermes.env";
     # model = "anthropic/claude-sonnet-4";  # override if you prefer another model
+  };
+
+  services.homelabHealth = {
+    enable = true;
+    healthUrls = [
+      "http://127.0.0.1:81"
+      "http://127.0.0.1:8000"
+      "http://127.0.0.1:8081"
+      "http://127.0.0.1:8082"
+      "http://127.0.0.1:3000"
+      "http://127.0.0.1:4533"
+      "http://127.0.0.1:5000"
+      "http://127.0.0.1:5984"
+      "http://127.0.0.1:9000"
+      "http://127.0.0.1:2283"
+    ];
   };
 
   services.moondream = {

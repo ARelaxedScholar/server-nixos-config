@@ -8,6 +8,7 @@ in
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ../../services/homelab-health.nix
   ];
 
   networking.hostName = "thesentry";
@@ -180,5 +181,24 @@ in
         image = "docker.io/library/redis:6.2-alpine";
       };
     };
+  };
+
+  services.homelabHealth = {
+    enable = true;
+    healthUrls = [
+      "http://127.0.0.1:2283"
+      "http://127.0.0.1:5984"
+      "http://127.0.0.1:8081"
+      "http://127.0.0.1:8000"
+    ];
+    pathChecks = [
+      "/mnt/data/immich/library"
+      "/mnt/data/immich/postgres"
+    ];
+    logTargets = [
+      "immich_server"
+      "immich_postgres"
+      "immich_redis"
+    ];
   };
 }
