@@ -8,7 +8,7 @@
     impermanence.url = "github:nix-community/impermanence";
     animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
-    hermes-agent.url = "github:NousResearch/hermes-agent";
+    hermes-agent.url =                                                                              "git+https://github.com/NousResearch/hermes-agent?rev=2483200963e43e7335e02f3f51440db089bcc1a3";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
   };
 

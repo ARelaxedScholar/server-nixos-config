@@ -369,7 +369,6 @@
     chromium
     nh
     llama-cpp
-    nvtop
   ];
 
   programs.nix-ld.enable = true;
