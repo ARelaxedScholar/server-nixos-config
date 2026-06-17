@@ -151,12 +151,12 @@ EOF
           fi
         fi
 
-        # Fix perms — must run AFTER hermes config --init, which
-        # recreates .hermes with 0700. Impermanence also preserves
-        # stale perms across reboots.
-        # 2775: setgid so new children inherit the hermes group
-        find "$HERMES_HOME" -type d -exec chmod 2775 {} + || true
-        find "$HERMES_HOME" -type f -exec chmod 0664 {} + || true
+        # Ensure $HERMES_HOME itself is owned and traversable by Hermes
+        install -d -m 0700 -o ${cfg.user} -g ${cfg.group} "$HERMES_HOME"
+
+        # Ensure config.yaml is owned by Hermes, readable only by user+group (non-recursive, non-group-write)
+        chown ${cfg.user}:${cfg.group} "$HERMES_HOME/config.yaml"
+        chmod 0640 "$HERMES_HOME/config.yaml"
       '';
     };
 

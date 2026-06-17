@@ -29,19 +29,12 @@
   };
 
   outputs =
-    {
-      nixpkgs,
-      disko,
-      impermanence,
-      animus,
-      llm-agents,
-      swagwatch-engine,
-      watchtower,
-      weaver,
-      uriel,
-      ...
-    }@inputs:
+    { nixpkgs, ... }@inputs:
     let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs { inherit system; };
+      openshell-pkg = pkgs.callPackage ./packages/openshell { };
+
       mkHost =
         {
           modules,
@@ -50,30 +43,41 @@
         nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           specialArgs = {
-            inherit inputs;
+            inherit inputs openshell-pkg;
           }
           // extraSpecialArgs;
           inherit modules;
         };
     in
     {
+      packages.${system}.openshell = pkgs.callPackage ./packages/openshell { };
+
       nixosConfigurations = {
         swagwatch-engine = mkHost {
-          extraSpecialArgs = { inherit animus llm-agents swagwatch-engine watchtower weaver uriel; };
+          extraSpecialArgs = {
+            animus = inputs.animus;
+            llm-agents = inputs.llm-agents;
+            swagwatch-engine = inputs.swagwatch-engine;
+            watchtower = inputs.watchtower;
+            weaver = inputs.weaver;
+            uriel = inputs.uriel;
+            inherit openshell-pkg;
+          };
           modules = [
             ./modules/common/base.nix
             ./hosts/swagwatch-engine/default.nix
-            disko.nixosModules.disko
-            impermanence.nixosModules.impermanence
+            ./modules/common/openshell.nix
+            inputs.disko.nixosModules.disko
+            inputs.impermanence.nixosModules.impermanence
           ];
         };
 
         thesentry = mkHost {
-          extraSpecialArgs = { inherit llm-agents; };
+          extraSpecialArgs = { llm-agents = inputs.llm-agents; };
           modules = [
             ./modules/common/base.nix
             ./hosts/thesentry/default.nix
-            disko.nixosModules.disko
+            inputs.disko.nixosModules.disko
           ];
         };
       };

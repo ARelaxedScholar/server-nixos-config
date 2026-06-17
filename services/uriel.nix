@@ -51,7 +51,7 @@ in
     soulFile = lib.mkOption {
       type = lib.types.path;
       description = "Path to soul.md (Uriel's immutable identity document)";
-      example = "/persist/etc/secrets/uriel-soul.md";
+      example = "/persist/etc/secrets/soul.md";
     };
 
     sys1Stub = lib.mkOption {

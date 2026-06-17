@@ -342,8 +342,12 @@ users.users.hermes = {
   services.uriel = {
     enable = true;
     envFile = /persist/etc/secrets/uriel.env;
-    soulFile = /persist/etc/secrets/uriel-soul.md;
+    soulFile = /persist/etc/secrets/soul.md;
     sys1Stub = false;  # Real Sys1 via Ollama (urielsys1)
+  };
+
+  services.openshell = {
+    enable = true;
   };
 
   services.homelabHealth = {
