@@ -115,8 +115,8 @@ in
         # recreates .hermes with 0700. Impermanence also preserves
         # stale perms across reboots.
         # 2775: setgid so new children inherit the hermes group
-        find "$HERMES_HOME" -type d -exec chmod 2775 {} +
-        find "$HERMES_HOME" -type f -exec chmod 0664 {} +
+        find "$HERMES_HOME" -type d -exec chmod 2775 {} + || true
+        find "$HERMES_HOME" -type f -exec chmod 0664 {} + || true
       '';
     };
 
