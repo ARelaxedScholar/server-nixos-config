@@ -367,6 +367,7 @@
     ];
     extraGroups = [
       "docker"
+      "hermes"
       "wheel"
     ];
   };
