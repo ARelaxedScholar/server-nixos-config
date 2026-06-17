@@ -336,7 +336,7 @@
     enable = true;
     envFile = /persist/etc/secrets/uriel.env;
     soulFile = /persist/etc/secrets/uriel-soul.md;
-    sys1Stub = true;  # Dry soak — no Ollama required
+    sys1Stub = false;  # Real Sys1 via Ollama (urielsys1)
   };
 
   services.homelabHealth = {
