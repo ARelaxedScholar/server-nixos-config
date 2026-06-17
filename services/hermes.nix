@@ -29,6 +29,25 @@ in
       '';
       example = "/persist/etc/secrets/hermes.env";
     };
+ memoryProvider = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = "honcho";
+      description = "External memory provider to configure for Hermes (honcho, mem0, etc.), or null to leave disabled";
+    };
+
+    honchoBaseUrl = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Base URL for a self-hosted Honcho instance";
+      example = "http://honcho.local:8787";
+    };
+
+    honchoApiKeyFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "Optional file containing the self-hosted Honcho bearer/JWT token";
+      example = "/persist/etc/secrets/honcho-token";
+    };
 
     model = lib.mkOption {
       type = lib.types.str;

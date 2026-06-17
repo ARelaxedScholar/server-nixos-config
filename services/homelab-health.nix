@@ -138,13 +138,15 @@ in
       "d /var/lib/homelab-health 0755 root root -"
     ];
 
-    systemd.services.homelab-health-report = {
+        systemd.services.homelab-health-report = {
       description = "Deterministic homelab health report";
       serviceConfig.Type = "oneshot";
       script = ''
         set -euo pipefail
         mkdir -p "$(dirname ${lib.escapeShellArg cfg.reportPath})"
         ${report}/bin/homelab-health | tee ${lib.escapeShellArg cfg.reportPath}
+        chgrp hermes ${lib.escapeShellArg cfg.reportPath} || true
+        chmod 0640 ${lib.escapeShellArg cfg.reportPath} || true
       '';
     };
 

@@ -21,6 +21,11 @@
     ../../services/uriel.nix
   ];
 
+users.users.hermes = {
+    extraGroups = [ "systemd-journal" ];
+    shell = pkgs.bashInteractive;
+  };
+
   networking.hostName = "swagwatch-engine";
   networking.hostId = "b4dc0ff3";
   networking.useDHCP = true;
@@ -302,6 +307,8 @@
     "d /persist/var/lib/minio/data   0750 minio minio -"
     "d /persist/var/lib/minio/config 0750 minio minio -"
     "d /persist/var/lib/minio/certs  0750 minio minio -"
+    "d /var/lib/hermes/reports 0750 hermes hermes - -"
+    "d /var/lib/homelab-health 0750 root hermes - -"
   ];
 
   systemd.services.minio = {
@@ -341,6 +348,8 @@
 
   services.homelabHealth = {
     enable = true;
+    reportPath = "/var/lib/homelab-health/latest.txt";
+
     healthUrls = [
       "http://127.0.0.1:81"
       "http://127.0.0.1:8000"
@@ -353,13 +362,20 @@
       "http://127.0.0.1:9000"
       "http://127.0.0.1:2283"
     ];
+
+    pathChecks = [
+      "/var/lib/hermes"
+      "/var/lib/homelab-health"
+    ];
+
+    logTargets = [ ];
   };
 
   services.moondream = {
     enable = true;
     # Model and host/port defaults match what swagwatch-engine expects
     # (model = "moondream", host = "127.0.0.1", port = 11434)
-    # Persist downloaded models across reboots
+    # Persist downloaded models across reboote
     modelDir = "/persist/cache/ollama";
   };
 
