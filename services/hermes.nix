@@ -107,7 +107,8 @@ in
         # Merge env file
         if [ -n "${cfg.envFile}" ] && [ -f "${cfg.envFile}" ]; then
           if [ "${cfg.envFile}" != "$HERMES_HOME/.env" ]; then
-            cp "${cfg.envFile}" "$HERMES_HOME/.env"
+            # install removes old file first so owner is always hermes
+            install -m 0664 "${cfg.envFile}" "$HERMES_HOME/.env"
           fi
         fi
 
