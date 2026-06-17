@@ -62,7 +62,7 @@ in
         isSystemUser = true;
         group = cfg.group;
         description = "Hermes Agent service user";
-        home = cfg.stateDir;
+        home = "${cfg.stateDir}/home";
         createHome = true;
       };
       groups.${cfg.group} = { };
@@ -77,6 +77,7 @@ in
     };
 
     systemd.tmpfiles.rules = [
+      "d ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
       "z ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
       # z = set perms on existing dirs too (impermanence can leave stale 0700)
       "z ${cfg.stateDir}/.hermes 2775 ${cfg.user} ${cfg.group} -"
