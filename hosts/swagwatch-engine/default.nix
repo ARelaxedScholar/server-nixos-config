@@ -164,6 +164,11 @@
     unitConfig.ConditionPathIsMountPoint = "/var/lib/postgresql";
   };
 
+  systemd.tmpfiles.rules = [
+    "d /var/lib/hermes/workspace 0755 hermes hermes -"
+    "d /var/lib/hermes/workspace/server-nixos-config 0755 hermes hermes -"
+  ];
+
   # Generic failure alarm: attach with unitConfig.OnFailure = [ "notify-failure@%p.service" ];
   # Alerts persist in /persist/var/lib/failure-alerts.log and are shown on every
   # interactive login until the file is truncated. For phone push, write a ntfy

@@ -82,6 +82,7 @@ in
       # z = set perms on existing dirs too (impermanence can leave stale 0700)
       "z ${cfg.stateDir}/.hermes 2775 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/workspace 0755 ${cfg.user} ${cfg.group} -"
+      "d ${cfg.stateDir}/workspace/server-nixos-config 0755 ${cfg.user} ${cfg.group} -"
     ];
 
     # Generate config.yaml from declarative settings
@@ -113,6 +114,24 @@ in
           fi
         fi
 
+        if [ "${if cfg.memoryProvider != null then cfg.memoryProvider else ""}" = "honcho" ]; then
+          mkdir -p "$HERMES_HOME"
+          cat > "$HERMES_HOME/honcho.json" <<EOF
+{
+  "hosts": {
+    "self-hosted": {
+      "baseUrl": "${if cfg.honchoBaseUrl != null then cfg.honchoBaseUrl else "http://127.0.0.1:8787"}"
+    }
+  }
+}
+EOF
+          if [ -n "${if cfg.honchoApiKeyFile != null then toString cfg.honchoApiKeyFile else ""}" ] && [ -f "${if cfg.honchoApiKeyFile != null then toString cfg.honchoApiKeyFile else "/dev/null"}" ]; then
+            token="$(${pkgs.coreutils}/bin/cat ${toString cfg.honchoApiKeyFile})"
+            ${pkgs.jq}/bin/jq --arg token "$token" '.hosts["self-hosted"].apiKey = $token' "$HERMES_HOME/honcho.json" > "$HERMES_HOME/honcho.json.tmp"
+            mv "$HERMES_HOME/honcho.json.tmp" "$HERMES_HOME/honcho.json"
+          fi
+        fi
+
         # Fix perms — must run AFTER hermes config --init, which
         # recreates .hermes with 0700. Impermanence also preserves
         # stale perms across reboots.
@@ -121,6 +140,44 @@ in
         find "$HERMES_HOME" -type f -exec chmod 0664 {} + || true
       '';
     };
+
+    systemd.services.hermes-memory-setup = {
+      description = "Configure Hermes memory provider";
+      requiredBy = [ "hermes-init-config.service" ];
+      before = [ "hermes-init-config.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = cfg.user;
+        Group = cfg.group;
+      };
+      script = ''
+        HERMES_HOME="${cfg.stateDir}/.hermes"
+        export HERMES_HOME
+        mkdir -p "$HERMES_HOME"
+        if [ "${if cfg.memoryProvider != null then cfg.memoryProvider else ""}" = "honcho" ]; then
+          cat > "$HERMES_HOME/config.yaml" <<EOF
+memory:
+  provider: honcho
+EOF
+        fi
+      '';
+    };
+
+    systemd.services.hermes-workspace-perms = {
+      description = "Ensure Hermes workspace permissions and git trust";
+      requiredBy = [ "hermes-agent.service" ];
+      before = [ "hermes-agent.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = cfg.user;
+        Group = cfg.group;
+      };
+      script = ''
+        install -d -m 0755 -o ${cfg.user} -g ${cfg.group} ${cfg.stateDir}/workspace/server-nixos-config
+        ${pkgs.git}/bin/git config --global --add safe.directory ${cfg.stateDir}/workspace/server-nixos-config || true
+      '';
+    };
+
 
     systemd.services.hermes-agent = {
       description = "Hermes Agent - Nous Research autonomous agent framework";
