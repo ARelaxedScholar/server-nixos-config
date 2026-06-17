@@ -14,9 +14,9 @@
     # Watchtower ships its own flake (Rust); use its package output.
     watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
 
-    # Uriel — 24/7 autonomous agent (local source tree)
+    # Uriel — 24/7 autonomous agent
     uriel = {
-      url = "git+file:///home/user/Documents/Uriel";
+      url = "git+ssh://git@gitlab.com/arelaxedscholar-group/uriel.git";
       flake = true;
     };
 
