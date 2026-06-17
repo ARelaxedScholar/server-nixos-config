@@ -14,6 +14,12 @@
     # Watchtower ships its own flake (Rust); use its package output.
     watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
 
+    # Uriel — 24/7 autonomous agent (local source tree)
+    uriel = {
+      url = "git+file:///home/user/Documents/Uriel";
+      flake = true;
+    };
+
     # Weaver has no flake (pure-Python); fetch as a plain source tree and build
     # it in services/weaver.nix.
     weaver = {
@@ -32,6 +38,7 @@
       swagwatch-engine,
       watchtower,
       weaver,
+      uriel,
       ...
     }@inputs:
     let
@@ -52,7 +59,7 @@
     {
       nixosConfigurations = {
         swagwatch-engine = mkHost {
-          extraSpecialArgs = { inherit animus llm-agents swagwatch-engine watchtower weaver; };
+          extraSpecialArgs = { inherit animus llm-agents swagwatch-engine watchtower weaver uriel; };
           modules = [
             ./modules/common/base.nix
             ./hosts/swagwatch-engine/default.nix

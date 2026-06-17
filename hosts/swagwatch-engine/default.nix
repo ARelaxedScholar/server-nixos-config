@@ -18,6 +18,7 @@
     ../../services/homelab-health.nix
     ../../services/watchtower.nix
     ../../services/weaver.nix
+    ../../services/uriel.nix
   ];
 
   networking.hostName = "swagwatch-engine";
@@ -331,6 +332,13 @@
     enableLeadgen = true;
   };
 
+  services.uriel = {
+    enable = true;
+    envFile = /persist/etc/secrets/uriel.env;
+    soulFile = /persist/etc/secrets/uriel-soul.md;
+    sys1Stub = true;  # Dry soak — no Ollama required
+  };
+
   services.homelabHealth = {
     enable = true;
     healthUrls = [
@@ -409,6 +417,12 @@
         user = "weaver";
         group = "weaver";
         mode = "0750";
+      }
+      {
+        directory = "/var/lib/uriel";
+        user = "uriel";
+        group = "uriel";
+        mode = "0755";
       }
       "/home/user/"
       # hermes-agent state dirs are managed internally by the NixOS module
