@@ -77,7 +77,7 @@ in
     };
 
     systemd.tmpfiles.rules = [
-      "d ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
+      "z ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
       # z = set perms on existing dirs too (impermanence can leave stale 0700)
       "z ${cfg.stateDir}/.hermes 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/workspace 0755 ${cfg.user} ${cfg.group} -"
