@@ -102,6 +102,10 @@ in
       "z ${cfg.stateDir}/.hermes 2775 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/workspace 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/workspace/server-nixos-config 0755 ${cfg.user} ${cfg.group} -"
+      # Fix ownership of stale root-owned files after rebuild
+      "z ${cfg.stateDir}/.hermes/config.yaml 0640 ${cfg.user} ${cfg.group} -"
+      "z ${cfg.stateDir}/.hermes/gateway.lock 0640 ${cfg.user} ${cfg.group} -"
+      "z ${cfg.stateDir}/.hermes/gateway.pid 0640 ${cfg.user} ${cfg.group} -"
     ];
 
     # Generate config.yaml from declarative settings
