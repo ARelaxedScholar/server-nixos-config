@@ -50,8 +50,10 @@
         };
     in
     {
-      packages.${system}.openshell = openshell-pkg.openshell-cli;
-      packages.${system}.openshell-gateway = openshell-pkg.openshell-gateway;
+      packages.${system} = {
+        openshell = openshell-pkg.openshell-cli;
+        openshell-gateway = openshell-pkg.openshell-gateway;
+      };
 
       nixosConfigurations = {
         swagwatch-engine = mkHost {
