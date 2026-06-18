@@ -31,6 +31,13 @@ let
       sentry-sdk
     ];
     doCheck = false;
+
+    # Patch hardcoded paths to use writable state directory
+    postPatch = ''
+      substituteInPlace weaver/config.py \
+        --replace-fail 'STATE_FILE = Path(os.path.dirname(os.path.abspath(__file__))) / ".." / "state.json"' \
+        'STATE_FILE = Path("/var/lib/weaver/state.json")'
+    '';
   };
 
   # A oneshot unit. Weaver reads config from the process environment
