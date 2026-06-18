@@ -28,6 +28,7 @@ let
       pydantic-settings
       structlog
       beautifulsoup4
+      sentry-sdk
     ];
     doCheck = false;
   };
