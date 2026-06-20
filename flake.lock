@@ -463,11 +463,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1781571761,
-        "narHash": "sha256-XpEVh5BMEpzvrdGWVe484xadETu5qSCyx0RI5Bcaqa0=",
-        "ref": "refs/heads/main",
-        "rev": "4438b0a749a5f9b9089b7590cd603da76933ccdc",
-        "revCount": 434,
+        "lastModified": 1781983309,
+        "narHash": "sha256-aJz2o97V57NwffxaDrkabd5chEWmeVbeiUapW7wqTIk=",
+        "ref": "refs/heads/ariel/scraper-throughput-tuning",
+        "rev": "c236b3e82af98281db7f60810c5cb08aaa6029c1",
+        "revCount": 436,
         "type": "git",
         "url": "file:///mnt/data/swagwatch-engine"
       },

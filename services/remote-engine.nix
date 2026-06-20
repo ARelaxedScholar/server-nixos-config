@@ -29,6 +29,23 @@ in
       PUBLIC_BASE_URL = "https://engine.swagwatch.app";
       RUST_LOG = "swagwatch_engine=info,sqlx=warn,qdrant_client=warn";
       REDIS_URL = "redis://127.0.0.1:6379";
+
+      # Scraping throughput knobs.  Product concurrency widens the ingestion
+      # worker's per-collection processing windows. Scheduler knobs let the
+      # due-target backlog drain on a daily cadence instead of being capped at
+      # 100 claims per 5-minute tick. The Redis-backed DistributedRateLimiter
+      # still gates per-domain request rate.
+      DEFAULT_SCRAPER_CONCURRENCY = "40";
+      SCRAPER_CONCURRENCY = "ssense.com:64,kith.com:48,aritzia.com:48,urban-planet.com:48,simons.ca:24,target.com:16";
+      # Redis token-bucket limits: domain:burst_capacity:refill_per_second.
+      # Suffix matching is supported, so asos.com also covers www.asos.com.
+      SCRAPER_RATE_LIMITS = "asos.com:50:20,massimodutti.com:20:5,bershka.com:20:5,stradivarius.com:20:5,pullandbear.com:20:5,zara.com:20:5,oysho.com:20:5,kith.com:5:1.5";
+      SCRAPE_DISCOVERY_CONCURRENCY = "16";
+      SCRAPE_DOMAIN_CONCURRENCY = "20";
+      SCRAPE_TARGETS_PER_DOMAIN_CONCURRENCY = "4";
+      SCRAPE_CLAIM_BATCH_SIZE = "2000";
+      SCRAPE_CLAIM_LEASE_HOURS = "2";
+
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
       # Tell the caption worker where to find Moondream (via Ollama)
       # Port 11434 is hardcoded in ollama.rs, hostname only here
@@ -48,9 +65,11 @@ in
       Group = "users";
 
       # --- THE VIP RESOURCE BOUNDS ---
-      # Give the scraper breathing room, but protect the 32GB host
-      MemoryHigh = "8G"; # Start throttling here
-      MemoryMax = "12G"; # Absolute kill limit
+      # Give the scraper breathing room, but protect the 32GB host. Redis was
+      # previously carrying multi-GB scheduler queues; after trimming that,
+      # the engine can safely have more headroom for wider scrape batches.
+      MemoryHigh = "12G"; # Start throttling here
+      MemoryMax = "16G"; # Absolute kill limit
 
       # Priority: Negative 'Nice' means SwagWatch gets CPU priority over Animus
       Nice = -5;
