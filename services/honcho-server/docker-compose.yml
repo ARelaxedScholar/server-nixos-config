@@ -1,0 +1,83 @@
+# Honcho Memory Server - Docker Compose
+# Self-hosted Honcho API for Hermes Agent memory
+#
+# API: http://127.0.0.1:8000
+# PostgreSQL+pgvector: 127.0.0.1:5433
+# Redis: 127.0.0.1:6380
+#
+# Start: docker compose up -d
+# Logs:  docker compose logs -f honcho-api
+
+services:
+  honcho-api:
+    build:
+      context: /tmp/honcho
+      dockerfile: Dockerfile
+    entrypoint: ["sh", "docker/entrypoint.sh"]
+    depends_on:
+      honcho-db:
+        condition: service_healthy
+      honcho-redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/app/.venv/bin/python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2).read()",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    environment:
+      - DB_CONNECTION_URI=postgresql+psycopg://postgres:postgres@honcho-db:5432/honcho
+      - CACHE_URL=redis://honcho-redis:6379/0?suppress=true
+      - CACHE_ENABLED=true
+      - AUTH_ENABLED=***      - LOG_LEVEL=INFO
+      - VECTOR_STORE_TYPE=pgvector
+      - EMBED_MESSAGES=false
+      - DERIVER_ENABLED=false
+      - PEER_CARD_ENABLED=true
+      - SUMMARY_ENABLED=false
+      - DREAM_ENABLED=false
+      - DIALECTIC_LEVELS__minimal__MODEL_CONFIG__TRANSPORT=openai
+      - DIALECTIC_LEVELS__minimal__MODEL_CONFIG__MODEL=gpt-5.4-mini
+    restart: unless-stopped
+
+  honcho-db:
+    image: pgvector/pgvector:pg15
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      - POSTGRES_DB=honcho
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=***      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - honcho-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d honcho"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  honcho-redis:
+    image: redis:8.2-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6380:6379"
+    volumes:
+      - honcho-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  honcho-pgdata:
+  honcho-redis-data:

@@ -53,6 +53,14 @@
       # the default 90s.  This belongs in [Service], not [Unit].
       TimeoutStartSec = lib.mkForce 1800;
       TimeoutStopSec = lib.mkForce 600;
+      Restart = "on-failure";
+      RestartSec = "30s";
+      # Redis is a stateful dependency for SwagWatch rate limits/queues and has
+      # to survive high-pressure rebuild windows. The last failed switch showed
+      # the kernel choosing redis-server as the OOM victim while local Rust/Nix
+      # work, Ollama, and Postgres were resident. Bias OOM selection away from
+      # Redis so disposable build/agent processes die first.
+      OOMScoreAdjust = -900;
       # Disable DynamicUser so systemd doesn't fight the bind-mounted directory
       DynamicUser = lib.mkForce false;
       User = "redis";

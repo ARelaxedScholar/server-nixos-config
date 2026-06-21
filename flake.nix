@@ -15,6 +15,7 @@
     # declarative service can build the current workspace while the repo is being
     # bootstrapped; switch this to the canonical remote once Forge is published.
     forge.url = "path:/home/user/workspace/forge";
+    forge.inputs.nixpkgs.follows = "nixpkgs";
 
     # Watchtower ships its own flake (Rust); use its package output.
     watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";

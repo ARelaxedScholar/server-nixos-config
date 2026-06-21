@@ -194,6 +194,23 @@
         "type": "github"
       }
     },
+    "forge": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781998794,
+        "narHash": "sha256-2W/4JmqJLXfauK73dMe/AnYiDoyNzg9PHCerWMo6hvM=",
+        "path": "/home/user/workspace/forge",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/user/workspace/forge",
+        "type": "path"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -390,6 +407,7 @@
       "inputs": {
         "animus": "animus",
         "disko": "disko",
+        "forge": "forge",
         "impermanence": "impermanence",
         "llm-agents": "llm-agents",
         "nixpkgs": "nixpkgs_4",
@@ -463,11 +481,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1781983309,
-        "narHash": "sha256-aJz2o97V57NwffxaDrkabd5chEWmeVbeiUapW7wqTIk=",
+        "lastModified": 1782039437,
+        "narHash": "sha256-nUmgrkuz4GW1VAUYXva16voPMnkZtQbja286AU0+Ehk=",
         "ref": "refs/heads/ariel/scraper-throughput-tuning",
-        "rev": "c236b3e82af98281db7f60810c5cb08aaa6029c1",
-        "revCount": 436,
+        "rev": "f74b021dba4bd73db062d3957ad1f5b361621d3f",
+        "revCount": 438,
         "type": "git",
         "url": "file:///mnt/data/swagwatch-engine"
       },
@@ -578,11 +596,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1781723256,
-        "narHash": "sha256-kO7np5F5PwBHKpDv8WG3Ac1ZmTDPb9qk410dz1jaf3U=",
+        "lastModified": 1782037444,
+        "narHash": "sha256-1zfqaQmSPRv6dc1yasxMtU/T1s5jRAjW+VjScW9rr5c=",
         "ref": "refs/heads/master",
-        "rev": "06d7f593520445d43ea450e0d2526bdedd0db05a",
-        "revCount": 43,
+        "rev": "beb8ed9456d40ca265f101e035bc8475ba1abb83",
+        "revCount": 51,
         "type": "git",
         "url": "ssh://git@gitlab.com/arelaxedscholar-group/uriel.git"
       },
@@ -614,11 +632,11 @@
     "weaver": {
       "flake": false,
       "locked": {
-        "lastModified": 1781640040,
-        "narHash": "sha256-3BVgXHIlmw/32QGI6ZbbqgZJl3v7D7a1I8Np/RZfYDM=",
+        "lastModified": 1781737340,
+        "narHash": "sha256-7tiidD9FGZqwUyP4NxXxXHp/vAQqwechNUOpajjWz1M=",
         "ref": "refs/heads/main",
-        "rev": "7f46043e9e0967317e8ad3f4316744231dbc8ae3",
-        "revCount": 3,
+        "rev": "8c1f3b49bf9df3928a3b5600da5411cfe270190f",
+        "revCount": 7,
         "type": "git",
         "url": "ssh://git@gitlab.com/swagwatch/growth/weaver.git"
       },

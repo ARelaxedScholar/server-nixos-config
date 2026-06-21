@@ -91,6 +91,11 @@ in
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir} 0750 ${cfg.user} ${cfg.group} -"
       "d ${cfg.runsDir} 0750 ${cfg.user} ${cfg.group} -"
+      # Let the non-root Forge reaper traverse the secrets directory and read
+      # only the Vast env file it needs.  Do not relax ownership/mode for the
+      # whole secrets tree.
+      "a+ /persist/etc/secrets - - - - g:${cfg.group}:--x"
+      "a+ ${cfg.vastaiEnvFile} - - - - g:${cfg.group}:r--"
     ];
 
     systemd.services.forge-reaper = lib.mkIf cfg.reaper.enable {
@@ -117,6 +122,9 @@ in
         ProtectSystem = "strict";
         ProtectHome = true;
         ReadWritePaths = [ cfg.dataDir ];
+        TimeoutStartSec = "60s";
+        CPUQuota = "20%";
+        MemoryMax = "256M";
       };
     };
 

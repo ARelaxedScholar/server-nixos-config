@@ -73,6 +73,17 @@ in
       default = "/var/lib/hermes";
       description = "State directory (HERMES_HOME)";
     };
+
+    stateImportFrom = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        Optional source directory to seed the Hermes home from on first boot.
+        Use this to migrate an existing interactive home into the service home
+        for continuity (for example /home/user/.hermes).
+      '';
+      example = "/home/user/.hermes";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -90,12 +101,8 @@ in
     # Make hermes CLI available on PATH
     environment.systemPackages = [ hermesPkg ];
 
-    # Set HERMES_HOME system-wide so CLI shares state with the service
-    environment.sessionVariables = {
-      HERMES_HOME = "${cfg.stateDir}/.hermes";
-    };
 
-    systemd.tmpfiles.rules = [
+    systemd.tmpfiles.rules = lib.optionals cfg.manageUser [
       "d ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
       "z ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
       # z = set perms on existing dirs too (impermanence can leave stale 0700)
@@ -108,10 +115,45 @@ in
       "z ${cfg.stateDir}/.hermes/gateway.pid 0640 ${cfg.user} ${cfg.group} -"
     ];
 
+    systemd.services.hermes-seed-state = lib.mkIf (cfg.stateImportFrom != null) {
+      description = "Seed Hermes state from existing home";
+      wantedBy = [ "hermes-init-config.service" ];
+      before = [ "hermes-init-config.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+      };
+      script = ''
+        set -euo pipefail
+        SRC="${toString cfg.stateImportFrom}"
+        DST="${cfg.stateDir}/.hermes"
+        MARKER="$DST/.seeded-from-global"
+
+        if [ -e "$MARKER" ]; then
+          exit 0
+        fi
+
+        if [ ! -d "$SRC" ]; then
+          echo "Seed source $SRC does not exist; skipping"
+          exit 0
+        fi
+
+        install -d -m 0700 -o ${cfg.user} -g ${cfg.group} "$DST"
+        ${pkgs.rsync}/bin/rsync -a \
+          --exclude='*.lock' \
+          --exclude='gateway.pid' \
+          "$SRC"/ "$DST"/
+        chown -R ${cfg.user}:${cfg.group} "$DST"
+        rm -f "$DST/auth.lock" "$DST/gateway.lock" "$DST/gateway.pid" "$DST/kanban.db.init.lock"
+        touch "$MARKER"
+        chown ${cfg.user}:${cfg.group} "$MARKER"
+      '';
+    };
+
     # Generate config.yaml from declarative settings
     systemd.services.hermes-init-config = {
       description = "Initialize Hermes Agent config";
       requiredBy = [ "hermes-agent.service" ];
+      after = [ "hermes-seed-state.service" ];
       before = [ "hermes-agent.service" ];
       serviceConfig = {
         Type = "oneshot";

@@ -100,6 +100,8 @@ in
       wantedBy = [ "multi-user.target" ];
       after = [
         "network-online.target"
+        "openshell-gateway.service"
+        "openshell-sandbox-setup.service"
       ];
       wants = [ "network-online.target" ];
 
@@ -110,6 +112,7 @@ in
         WORKSPACE_DIR = "${cfg.stateDir}/workspace";
         ACTIVE_STREAM_FILE = "${cfg.stateDir}/workspace/streams/stream_001.log";
         RUST_LOG = "info,uriel=debug";
+        PATH = lib.mkForce "/usr/local/bin:/run/current-system/sw/bin:${pkgs.coreutils}/bin:${pkgs.uv}/bin";
       }
       // (lib.optionalAttrs cfg.sys1Stub {
         SYS1_STUB = "1";

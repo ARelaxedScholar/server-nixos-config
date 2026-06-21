@@ -35,9 +35,30 @@
     "nix-command"
     "flakes"
   ];
+  # Keep rebuilds from competing too aggressively with Redis/Postgres/Ollama on
+  # this live host. The previous crash lined up with a local Rust/Forge build
+  # during `nixos-rebuild switch`, while Redis was replaying its ~8.6 GiB
+  # persistence image and the kernel OOM-killed redis-server. Favor slow,
+  # predictable rebuilds over parallel local compilation pressure.
+  nix.settings.max-jobs = 1;
+  nix.settings.cores = 2;
   nix.settings.trusted-users = [
     "root"
     "user"
+  ];
+  # Let Ariel/Hermes perform operator-approved maintenance without getting
+  # stuck behind an interactive password prompt. Keep it scoped to the primary
+  # login user rather than making the whole wheel group passwordless.
+  security.sudo.extraRules = [
+    {
+      users = [ "user" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
   ];
   nix.settings.auto-optimise-store = true;
   nix.settings.substituters = [
@@ -110,6 +131,8 @@
       HostName musa-openshell-sandbox
       User sandbox
       ProxyCommand ${pkgs.bash}/bin/bash -c 'container="$(${pkgs.docker}/bin/docker ps --format "{{.Names}}" | ${pkgs.gnugrep}/bin/grep -m1 "^openshell-musa-sandbox-")"; test -n "$container"; exec ${pkgs.docker}/bin/docker exec -i "$container" /usr/sbin/sshd -i -e -o UsePAM=no -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no -o PermitUserEnvironment=yes'
+      IdentityFile /home/user/.hermes/profiles/musa/ssh/id_ed25519_openshell
+      IdentitiesOnly yes
       StrictHostKeyChecking accept-new
       UserKnownHostsFile /home/user/.ssh/known_hosts
   '';
@@ -142,6 +165,7 @@
       port = 2222;
       authorizedKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8VQdhvpNjpVmzSn4fgiRuesTMTtIJr63PTTBkzx6wv"
       ];
       hostKeys = [ "/persist/etc/secrets/initrd/ssh_host_ed25519_key" ];
     };
@@ -150,6 +174,9 @@
   boot.initrd.systemd.enable = true;
 
   services.tailscale.enable = true;
+
+  # Ensure the login user can read the Vast secret for CLI forge operations
+#  users.users.user.extraGroups = [ "forge" ];
 
   services.forge = {
     enable = true;
@@ -387,6 +414,7 @@
       HOME = "/home/user";
       HERMES_HOME = "/home/user/.hermes";
       HERMES_PROFILE = "midas";
+      PYTHONPATH = "/home/user/.hermes/.venv/lib/python3.13/site-packages";
     };
     path = [
       pkgs.openssh
@@ -516,6 +544,7 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID1qzN7jOZSdb2ppgP+ldtvxKt5ielBVcS6g+cbRa/lG angemmanuel.kouakou+professional@gmail.com"
     ];
     extraGroups = [
+      "forge"
       "docker"
       "wheel"
     ];
