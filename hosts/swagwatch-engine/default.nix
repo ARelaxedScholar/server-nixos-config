@@ -509,7 +509,7 @@
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.docker}/bin/docker network create --driver bridge honcho-net 2>/dev/null || true";
+      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.docker}/bin/docker network inspect honcho-net >/dev/null 2>&1 || ${pkgs.docker}/bin/docker network create --driver bridge honcho-net'";
     };
   };
 
