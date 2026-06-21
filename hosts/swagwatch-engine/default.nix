@@ -475,9 +475,11 @@
         environment = {
           POSTGRES_DB = "honcho";
           POSTGRES_USER = "postgres";
-          POSTGRES_PASSWORD = "changeme";          PGDATA = "/var/lib/postgresql/data/pgdata";
+          POSTGRES_PASSWORD = "changeme";
+          PGDATA = "/var/lib/postgresql/data/pgdata";
         };
         extraOptions = [
+          "--network=honcho-net"
           "--health-cmd=pg_isready -U postgres -d honcho"
           "--health-interval=5s"
           "--health-timeout=5s"
@@ -489,32 +491,38 @@
         image = "redis:8.2-alpine";
         ports = [ "127.0.0.1:6380:6379" ];
         volumes = [ "honcho-redis-data:/data" ];
+        extraOptions = [
+          "--network=honcho-net"
+        ];
         autoStart = true;
       };
     };
   };
 
-  # Build Honcho API Docker image from source (one-shot)
-  systemd.services.honcho-build = {
-    description = "Build Honcho API Docker image";
+  # Create Docker network for Honcho containers (needed for DNS resolution by container name)
+  systemd.services.honcho-docker-network = {
+    description = "Create Docker network for Honcho stack";
     wantedBy = [ "multi-user.target" ];
-    before = [ "docker-honcho-api.service" ];
+    before = [ "docker-honcho-db.service" "docker-honcho-redis.service" "docker-honcho-api.service" ];
+    requires = [ "docker.service" ];
+    after = [ "docker.service" ];
     serviceConfig = {
       Type = "oneshot";
-      User = "user";
-      Group = "users";
       RemainAfterExit = true;
-      ExecStart = pkgs.writeShellScript "honcho-build" ''
-        set -euo pipefail
-        if docker image inspect honcho-api:latest >/dev/null 2>&1; then
-          echo "Honcho API image already exists"
-          exit 0
-        fi
-        echo "Building Honcho API image from source..."
-        cd /var/lib/honcho/source
-        docker build -t honcho-api:latest .
-        echo "Build complete"
-      '';
+      ExecStart = "${pkgs.docker}/bin/docker network create --driver bridge honcho-net 2>/dev/null || true";
+    };
+  };
+
+  # Note: honcho-api image is built manually via docker build
+  # This oneshot build service has networking issues on this host.
+  # Image build is handled imperatively until NixOS config is updated.
+  systemd.services.honcho-build = {
+    description = "Build Honcho API Docker image (disabled - see notes)";
+    wantedBy = [ ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "/run/current-system/true";
+      RemainAfterExit = true;
     };
   };
 
@@ -522,10 +530,10 @@
   virtualisation.oci-containers.containers.honcho-api = {
     image = "honcho-api:latest";
     dependsOn = [ "honcho-db" "honcho-redis" ];
-    ports = [ "127.0.0.1:8000:8000" ];
+    ports = [ "127.0.0.1:8002:8000" ];
     environment = {
-      DB_CONNECTION_URI = "postgresql+psycopg://postgres:postgres@127.0.0.1:5433/honcho";
-      CACHE_URL = "redis://127.0.0.1:6380/0?suppress=true";
+      DB_CONNECTION_URI = "postgresql+psycopg://postgres:changeme@honcho-db:5432/honcho";
+      CACHE_URL = "redis://honcho-redis:6379/0?suppress=true";
       CACHE_ENABLED = "true";
       AUTH_ENABLED = "false";
       LOG_LEVEL = "INFO";
@@ -536,6 +544,9 @@
       SUMMARY_ENABLED = "false";
       DREAM_ENABLED = "false";
     };
+    extraOptions = [
+      "--network=honcho-net"
+    ];
     autoStart = true;
   };
 
