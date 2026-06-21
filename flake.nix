@@ -11,6 +11,11 @@
     llm-agents.url =                                                                                                "git+https://github.com/numtide/llm-agents.nix?rev=53673313e86582f3ac7050ff826158fd843c219d";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
 
+    # Forge is developed locally on this host for now. Use a path input so the
+    # declarative service can build the current workspace while the repo is being
+    # bootstrapped; switch this to the canonical remote once Forge is published.
+    forge.url = "path:/home/user/workspace/forge";
+
     # Watchtower ships its own flake (Rust); use its package output.
     watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
 
@@ -61,6 +66,7 @@
             animus = inputs.animus;
             llm-agents = inputs.llm-agents;
             swagwatch-engine = inputs.swagwatch-engine;
+            forge = inputs.forge;
             watchtower = inputs.watchtower;
             weaver = inputs.weaver;
             uriel = inputs.uriel;

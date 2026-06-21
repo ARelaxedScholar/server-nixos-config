@@ -32,11 +32,21 @@ let
     ];
     doCheck = false;
 
-    # Patch hardcoded paths to use writable state directory
+    # Patch hardcoded paths + filter noisy signals + fix content policy
     postPatch = ''
       substituteInPlace weaver/config.py \
         --replace-fail 'STATE_FILE = Path(os.path.dirname(os.path.abspath(__file__))) / ".." / "state.json"' \
         'STATE_FILE = Path("/var/lib/weaver/state.json")'
+
+      # Filter out "other" category signals — too noisy, not reportable
+      substituteInPlace weaver/factory.py \
+        --replace-fail 'for rs in raw_signals[:10]:  # top 10 by magnitude' \
+        'for rs in [s for s in raw_signals if s.get("category", "").lower() != "other"][:10]:  # top 10 by magnitude, skip other'
+
+      # Narrow the private-data regex: "private sales" is not insider knowledge
+      substituteInPlace weaver/content_policy.py \
+        --replace-fail 'r"internal\s+(?:sales|data|numbers)|private\s+(?:data|sales|"' \
+        'r"internal\s+(?:sales|data|numbers)|private\s+(?:data|"'
     '';
   };
 

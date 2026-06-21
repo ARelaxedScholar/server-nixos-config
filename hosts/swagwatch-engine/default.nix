@@ -19,12 +19,9 @@
     ../../services/watchtower.nix
     ../../services/weaver.nix
     ../../services/uriel.nix
+    ../../services/forge.nix
   ];
 
-users.users.hermes = {
-    extraGroups = [ "systemd-journal" ];
-    shell = pkgs.bashInteractive;
-  };
 
   networking.hostName = "swagwatch-engine";
   networking.hostId = "b4dc0ff3";
@@ -66,6 +63,19 @@ users.users.hermes = {
 
   fileSystems."/persist".neededForBoot = true;
 
+  # Redis currently has an ~8.6 GiB base RDB/AOF image. During rebuilds/restarts it
+  # needs enough headroom to replay that file without the kernel OOM-killing it.
+  # Keep this boring and host-local: compressed RAM swap for pressure spikes plus
+  # a ZFS zvol swap device. Do not use a swapfile on /persist: ZFS can present it
+  # as sparse/holed, and swapon refuses it.
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+  };
+  swapDevices = [
+    { device = "/dev/zvol/zroot/swap"; }
+  ];
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
@@ -81,11 +91,28 @@ users.users.hermes = {
   networking.firewall.allowedTCPPorts = [
     80
     443
+    8082
     9000
     9001
     5432
   ];
   networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 11434 ];
+
+  # Provide /bin/sh for software that hardcodes it (e.g. Uriel's shell tool)
+  environment.binsh = "${pkgs.bash}/bin/sh";
+
+  # Hermes persona terminal routing: Musa's Hermes terminal backend uses SSH to
+  # enter his OpenShell sandbox. Keep the SSH alias declarative and dynamic so
+  # it survives OpenShell sandbox recreation, whose Docker container name has a
+  # generated suffix.
+  environment.etc."ssh/ssh_config.d/musa-openshell-sandbox.conf".text = ''
+    Host musa-openshell-sandbox
+      HostName musa-openshell-sandbox
+      User sandbox
+      ProxyCommand ${pkgs.bash}/bin/bash -c 'container="$(${pkgs.docker}/bin/docker ps --format "{{.Names}}" | ${pkgs.gnugrep}/bin/grep -m1 "^openshell-musa-sandbox-")"; test -n "$container"; exec ${pkgs.docker}/bin/docker exec -i "$container" /usr/sbin/sshd -i -e -o UsePAM=no -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no -o PermitUserEnvironment=yes'
+      StrictHostKeyChecking accept-new
+      UserKnownHostsFile /home/user/.ssh/known_hosts
+  '';
 
   boot.initrd.luks.devices."crypted_data" = {
     keyFile = lib.mkForce "/data_drive.key";
@@ -123,6 +150,19 @@ users.users.hermes = {
   boot.initrd.systemd.enable = true;
 
   services.tailscale.enable = true;
+
+  services.forge = {
+    enable = true;
+    dataDir = "/var/lib/forge";
+    vastaiEnvFile = "/persist/etc/secrets/vastai.env";
+    reaper = {
+      enable = true;
+      # Keep the deployed reaper non-destructive until Forge's Section 18 Vast
+      # safety gate has passed with real label round-trip + teardown evidence.
+      dryRun = true;
+      interval = "10min";
+    };
+  };
 
   services.journald.extraConfig = ''
     SystemMaxUse=500M
@@ -323,8 +363,86 @@ users.users.hermes = {
 
   services.hermes = {
     enable = true;
+    manageUser = false;
+    user = "user";
+    group = "users";
+    stateDir = "/home/user";
     envFile = "/persist/etc/secrets/hermes.env";
     # model = "anthropic/claude-sonnet-4";  # override if you prefer another model
+  };
+
+  systemd.services.hermes-midas-gateway = {
+    description = "Hermes Agent gateway — Midas profile";
+    wantedBy = [ "multi-user.target" ];
+    after = [
+      "network-online.target"
+      "openshell-gateway.service"
+      "openshell-sandbox-setup.service"
+    ];
+    wants = [
+      "network-online.target"
+      "openshell-gateway.service"
+    ];
+    environment = {
+      HOME = "/home/user";
+      HERMES_HOME = "/home/user/.hermes";
+      HERMES_PROFILE = "midas";
+    };
+    path = [
+      pkgs.openssh
+      pkgs.docker
+    ];
+    serviceConfig = {
+      Type = "simple";
+      User = "user";
+      Group = "users";
+      WorkingDirectory = "/home/user";
+      EnvironmentFile = [ "-/persist/etc/secrets/midas.env" ];
+      ExecStart = "/run/current-system/sw/bin/hermes -p midas gateway run";
+      Restart = "on-failure";
+      RestartSec = "5s";
+      TimeoutStopSec = "240s";
+    };
+  };
+
+  systemd.services.hermes-musa-gateway = {
+    description = "Hermes Agent gateway — Musa profile";
+    wantedBy = [ "multi-user.target" ];
+    after = [
+      "network-online.target"
+      "openshell-gateway.service"
+      "openshell-sandbox-setup.service"
+    ];
+    wants = [
+      "network-online.target"
+      "openshell-gateway.service"
+    ];
+    environment = {
+      HOME = "/home/user";
+      HERMES_HOME = "/home/user/.hermes";
+      HERMES_PROFILE = "musa";
+      TERMINAL_ENV = "ssh";
+      TERMINAL_CWD = "/sandbox";
+      TERMINAL_SSH_HOST = "musa-openshell-sandbox";
+      TERMINAL_SSH_USER = "sandbox";
+      TERMINAL_SSH_PORT = "22";
+      TERMINAL_SSH_KEY = "/home/user/.hermes/profiles/musa/ssh/id_ed25519_openshell";
+    };
+    path = [
+      pkgs.openssh
+      pkgs.docker
+    ];
+    serviceConfig = {
+      Type = "simple";
+      User = "user";
+      Group = "users";
+      WorkingDirectory = "/home/user";
+      EnvironmentFile = [ "-/persist/etc/secrets/musa.env" ];
+      ExecStart = "/run/current-system/sw/bin/hermes -p musa gateway run";
+      Restart = "on-failure";
+      RestartSec = "5s";
+      TimeoutStopSec = "240s";
+    };
   };
 
   services.watchtower = {
@@ -399,7 +517,6 @@ users.users.hermes = {
     ];
     extraGroups = [
       "docker"
-      "hermes"
       "wheel"
     ];
   };
