@@ -35,20 +35,12 @@
     "nix-command"
     "flakes"
   ];
-  # Keep rebuilds from competing too aggressively with Redis/Postgres/Ollama on
-  # this live host. The previous crash lined up with a local Rust/Forge build
-  # during `nixos-rebuild switch`, while Redis was replaying its ~8.6 GiB
-  # persistence image and the kernel OOM-killed redis-server. Favor slow,
-  # predictable rebuilds over parallel local compilation pressure.
   nix.settings.max-jobs = 1;
   nix.settings.cores = 2;
   nix.settings.trusted-users = [
     "root"
     "user"
   ];
-  # Let Ariel/Hermes perform operator-approved maintenance without getting
-  # stuck behind an interactive password prompt. Keep it scoped to the primary
-  # login user rather than making the whole wheel group passwordless.
   security.sudo.extraRules = [
     {
       users = [ "user" ];
@@ -84,11 +76,6 @@
 
   fileSystems."/persist".neededForBoot = true;
 
-  # Redis currently has an ~8.6 GiB base RDB/AOF image. During rebuilds/restarts it
-  # needs enough headroom to replay that file without the kernel OOM-killing it.
-  # Keep this boring and host-local: compressed RAM swap for pressure spikes plus
-  # a ZFS zvol swap device. Do not use a swapfile on /persist: ZFS can present it
-  # as sparse/holed, and swapon refuses it.
   zramSwap = {
     enable = true;
     memoryPercent = 50;
@@ -119,13 +106,8 @@
   ];
   networking.firewall.interfaces."tailscale0".allowedTCPPorts = [ 11434 ];
 
-  # Provide /bin/sh for software that hardcodes it (e.g. Uriel's shell tool)
   environment.binsh = "${pkgs.bash}/bin/sh";
 
-  # Hermes persona terminal routing: Musa's Hermes terminal backend uses SSH to
-  # enter his OpenShell sandbox. Keep the SSH alias declarative and dynamic so
-  # it survives OpenShell sandbox recreation, whose Docker container name has a
-  # generated suffix.
   environment.etc."ssh/ssh_config.d/musa-openshell-sandbox.conf".text = ''
     Host musa-openshell-sandbox
       HostName musa-openshell-sandbox
@@ -175,17 +157,12 @@
 
   services.tailscale.enable = true;
 
-  # Ensure the login user can read the Vast secret for CLI forge operations
-#  users.users.user.extraGroups = [ "forge" ];
-
   services.forge = {
     enable = true;
     dataDir = "/var/lib/forge";
     vastaiEnvFile = "/persist/etc/secrets/vastai.env";
     reaper = {
       enable = true;
-      # Keep the deployed reaper non-destructive until Forge's Section 18 Vast
-      # safety gate has passed with real label round-trip + teardown evidence.
       dryRun = true;
       interval = "10min";
     };
@@ -237,11 +214,6 @@
     unitConfig.ConditionPathIsMountPoint = "/var/lib/postgresql";
   };
 
-  # Generic failure alarm: attach with unitConfig.OnFailure = [ "notify-failure@%p.service" ];
-  # Alerts persist in /persist/var/lib/failure-alerts.log and are shown on every
-  # interactive login until the file is truncated. For phone push, write a ntfy
-  # topic URL (e.g. https://ntfy.sh/<random-secret-topic>) to
-  # /persist/etc/secrets/alert-webhook-url and subscribe to it in the ntfy app.
   systemd.services."notify-failure@" = {
     description = "Failure alert for %i";
     serviceConfig.Type = "oneshot";
@@ -265,7 +237,6 @@
     fi
   '';
 
-  # Early warning before a full pool starts breaking services
   systemd.services.zpool-capacity-check = {
     description = "Alert when a zpool crosses 80% capacity";
     serviceConfig.Type = "oneshot";
@@ -301,24 +272,14 @@
       ExecStart = pkgs.writeShellScript "zfs-backup" ''
         set -euo pipefail
         ${pkgs.zfs}/bin/zfs list datapool/backups >/dev/null 2>&1 || ${pkgs.zfs}/bin/zfs create datapool/backups
-
-        # Clear any resume token from a previous interrupted receive
         ${pkgs.zfs}/bin/zfs receive -A datapool/backups/persist_mirror 2>/dev/null || true
-
-        # Prune destination snapshots BEFORE sending — ensures room for the incoming stream
         ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation \
           | grep "datapool/backups/persist_mirror@backup_" \
           | tail -n +31 \
           | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy -r 2>/dev/null || true
-
         TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
         SNAP_NAME="zroot/persist@backup_$TIMESTAMP"
         ${pkgs.zfs}/bin/zfs snapshot "$SNAP_NAME"
-
-        # Incremental send from the newest snapshot present on both sides.
-        # No -R: a replicated stream received with -F would destroy destination
-        # snapshots that were pruned on the source, defeating the 30-day
-        # retention on datapool while we keep only 2 on zroot.
         COMMON=""
         for dest_snap in $(${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation -d1 datapool/backups/persist_mirror 2>/dev/null | cut -d@ -f2); do
           if ${pkgs.zfs}/bin/zfs list "zroot/persist@$dest_snap" >/dev/null 2>&1; then
@@ -326,7 +287,6 @@
             break
           fi
         done
-
         echo "Starting ZFS replication for $SNAP_NAME (incremental from: ''${COMMON:-none, full send})..."
         if [ -n "$COMMON" ]; then
           ${pkgs.zfs}/bin/zfs send -v -I "@$COMMON" "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv \
@@ -337,14 +297,10 @@
             -o mountpoint=none -o canmount=off \
             datapool/backups/persist_mirror
         fi
-
-        # Keep only the 2 newest snapshots on the cramped source pool;
-        # the 30-day history lives on datapool/backups/persist_mirror.
         ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation \
           | grep "zroot/persist@backup_" \
           | tail -n +3 \
           | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy 2>/dev/null || true
-
         echo "Backup complete. 76k garments secured."
       '';
     };
@@ -376,6 +332,8 @@
     "d /persist/var/lib/minio/certs  0750 minio minio -"
     "d /var/lib/hermes/reports 0750 hermes hermes - -"
     "d /var/lib/homelab-health 0750 root hermes - -"
+    "d /var/lib/honcho        0755 user users - -"
+    "d /var/lib/honcho/source 0755 user users - -"
   ];
 
   systemd.services.minio = {
@@ -395,7 +353,31 @@
     group = "users";
     stateDir = "/home/user";
     envFile = "/persist/etc/secrets/hermes.env";
-    # model = "anthropic/claude-sonnet-4";  # override if you prefer another model
+  };
+
+  # --- Hermes Agent gateways ---
+
+  systemd.services.hermes-gateway = {
+    description = "Hermes Agent gateway — Ariel (default) profile";
+    wantedBy = [ "multi-user.target" ];
+    after = [
+      "network-online.target"
+      "hermes-init-config.service"
+    ];
+    wants = [ "network-online.target" ];
+    requires = [ "hermes-init-config.service" ];
+    environment = {
+      HERMES_HOME = "/home/user/.hermes";
+    };
+    serviceConfig = {
+      Type = "simple";
+      User = "user";
+      Group = "users";
+      ExecStart = "/run/current-system/sw/bin/hermes gateway run";
+      WorkingDirectory = "/home/user";
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
   };
 
   systemd.services.hermes-midas-gateway = {
@@ -473,6 +455,92 @@
     };
   };
 
+  # --- Honcho Memory Server ---
+
+  virtualisation.docker = {
+    enable = true;
+    daemon.settings = {
+      data-root = "/mnt/data/docker";
+    };
+  };
+
+  # Honcho DB + Redis via oci-containers (declarative)
+  virtualisation.oci-containers = {
+    backend = "docker";
+    containers = {
+      honcho-db = {
+        image = "pgvector/pgvector:pg15";
+        ports = [ "127.0.0.1:5433:5432" ];
+        volumes = [ "honcho-pgdata:/var/lib/postgresql/data" ];
+        environment = {
+          POSTGRES_DB = "honcho";
+          POSTGRES_USER = "postgres";
+          POSTGRES_PASSWORD = "changeme";          PGDATA = "/var/lib/postgresql/data/pgdata";
+        };
+        extraOptions = [
+          "--health-cmd=pg_isready -U postgres -d honcho"
+          "--health-interval=5s"
+          "--health-timeout=5s"
+          "--health-retries=10"
+        ];
+        autoStart = true;
+      };
+      honcho-redis = {
+        image = "redis:8.2-alpine";
+        ports = [ "127.0.0.1:6380:6379" ];
+        volumes = [ "honcho-redis-data:/data" ];
+        autoStart = true;
+      };
+    };
+  };
+
+  # Build Honcho API Docker image from source (one-shot)
+  systemd.services.honcho-build = {
+    description = "Build Honcho API Docker image";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "docker-honcho-api.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "user";
+      Group = "users";
+      RemainAfterExit = true;
+      ExecStart = pkgs.writeShellScript "honcho-build" ''
+        set -euo pipefail
+        if docker image inspect honcho-api:latest >/dev/null 2>&1; then
+          echo "Honcho API image already exists"
+          exit 0
+        fi
+        echo "Building Honcho API image from source..."
+        cd /var/lib/honcho/source
+        docker build -t honcho-api:latest .
+        echo "Build complete"
+      '';
+    };
+  };
+
+  # Honcho API container
+  virtualisation.oci-containers.containers.honcho-api = {
+    image = "honcho-api:latest";
+    dependsOn = [ "honcho-db" "honcho-redis" ];
+    ports = [ "127.0.0.1:8000:8000" ];
+    environment = {
+      DB_CONNECTION_URI = "postgresql+psycopg://postgres:postgres@127.0.0.1:5433/honcho";
+      CACHE_URL = "redis://127.0.0.1:6380/0?suppress=true";
+      CACHE_ENABLED = "true";
+      AUTH_ENABLED = "false";
+      LOG_LEVEL = "INFO";
+      VECTOR_STORE_TYPE = "pgvector";
+      EMBED_MESSAGES = "false";
+      DERIVER_ENABLED = "false";
+      PEER_CARD_ENABLED = "true";
+      SUMMARY_ENABLED = "false";
+      DREAM_ENABLED = "false";
+    };
+    autoStart = true;
+  };
+
+  # --- Other services ---
+
   services.watchtower = {
     enable = true;
     envFile = /persist/etc/secrets/watchtower.env;
@@ -489,7 +557,7 @@
     enable = true;
     envFile = /persist/etc/secrets/uriel.env;
     soulFile = /persist/etc/secrets/soul.md;
-    sys1Stub = false;  # Real Sys1 via Ollama (urielsys1)
+    sys1Stub = false;
   };
 
   services.openshell = {
@@ -523,17 +591,7 @@
 
   services.moondream = {
     enable = true;
-    # Model and host/port defaults match what swagwatch-engine expects
-    # (model = "moondream", host = "127.0.0.1", port = 11434)
-    # Persist downloaded models across reboote
     modelDir = "/persist/cache/ollama";
-  };
-
-  virtualisation.docker = {
-    enable = true;
-    daemon.settings = {
-      data-root = "/mnt/data/docker";
-    };
   };
 
   users.users.root.hashedPasswordFile = "/persist/etc/secrets/root-password";
@@ -591,7 +649,6 @@
         mode = "0755";
       }
       "/home/user/"
-      # hermes-agent state dirs are managed internally by the NixOS module
       "/persist/cache"
     ];
     files = [
