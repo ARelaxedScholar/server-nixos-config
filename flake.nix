@@ -17,21 +17,18 @@
     forge.url = "path:/home/user/workspace/forge";
     forge.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Watchtower ships its own flake (Rust); use its package output.
-    watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
-
-    # Uriel — 24/7 autonomous agent
-    uriel = {
-      url = "git+ssh://git@gitlab.com/arelaxedscholar-group/uriel.git";
-      flake = true;
-    };
-
-    # Weaver has no flake (pure-Python); fetch as a plain source tree and build
-    # it in services/weaver.nix.
-    weaver = {
-      url = "git+ssh://git@gitlab.com/swagwatch/growth/weaver.git";
-      flake = false;
-    };
+    # Watchtower, Weaver, and Uriel are disabled because their GitLab SSH
+    # remotes cannot be fetched during nix build (no SSH agent in sandbox).
+    # Re-enable once GitLab deploy tokens or HTTPS auth is configured.
+    # watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
+    # uriel = {
+    #   url = "git+ssh://git@gitlab.com/arelaxedscholar-group/uriel.git";
+    #   flake = true;
+    # };
+    # weaver = {
+    #   url = "git+ssh://git@gitlab.com/swagwatch/growth/weaver.git";
+    #   flake = false;
+    # };
   };
 
   outputs =
@@ -68,9 +65,9 @@
             llm-agents = inputs.llm-agents;
             swagwatch-engine = inputs.swagwatch-engine;
             forge = inputs.forge;
-            watchtower = inputs.watchtower;
-            weaver = inputs.weaver;
-            uriel = inputs.uriel;
+            # watchtower = inputs.watchtower;
+            # weaver = inputs.weaver;
+            # uriel = inputs.uriel;
             inherit openshell-pkg;
           };
           modules = [

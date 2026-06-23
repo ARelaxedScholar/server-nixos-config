@@ -1,0 +1,24 @@
+[0;1;34m# /etc/systemd/system/hermes-agent.service -> ]8;;file://swagwatch-engine/nix/store/rnwc3acy91pi7ani1abhabsii4l8wb9n-unit-hermes-agent.service/hermes-agent.service\/nix/store/rnwc3acy91pi7ani1abhabsii4l8wb9n-unit-hermes-agent.service/hermes-agent.service]8;;\[0m
+[0;1;36m[Unit][0m
+[0;1;32mAfter=[0mnetwork-online.target hermes-init-config.service
+[0;1;32mDescription=[0mHermes Agent - Nous Research autonomous agent framework
+[0;1;32mRequires=[0mhermes-init-config.service
+[0;1;32mWants=[0mnetwork-online.target
+
+[0;1;36m[Service][0m
+[0;1;32mEnvironment=[0m"HERMES_HOME=/home/user/.hermes"
+[0;1;32mEnvironment=[0m"LOCALE_ARCHIVE=/nix/store/98661jgb955g9r2ximb0dss7d325vkx0-glibc-locales-2.42-47/lib/locale/locale-archive"
+[0;1;32mEnvironment=[0m"PATH=/nix/store/i2vmgx46q9hd3z6rigaiman3wl3i2gc4-coreutils-9.9/bin:/nix/store/16wfacfgap3chf7mcjnd8dwi85dj4qqi-findutils-4.10.0/bin:/nix/store/02vv0r262agf9j5n2y1gmbjvdf12zkl0-gnugrep-3.12/bin:/nix/store/ryz8kcrm2bxpccllfqlb7qldsfnqp5c2-gnused-4.9/bin:/nix/store/5j9cg6adv3d2l403fcfklz4lmf9fd0l8-systemd-258.3/bin:/nix/store/i2vmgx46q9hd3z6rigaiman3wl3i2gc4-coreutils-9.9/sbin:/nix/store/16wfacfgap3chf7mcjnd8dwi85dj4qqi-findutils-4.10.0/sbin:/nix/store/02vv0r262agf9j5n2y1gmbjvdf12zkl0-gnugrep-3.12/sbin:/nix/store/ryz8kcrm2bxpccllfqlb7qldsfnqp5c2-gnused-4.9/sbin:/nix/store/5j9cg6adv3d2l403fcfklz4lmf9fd0l8-systemd-258.3/sbin"
+[0;1;32mEnvironment=[0m"TZDIR=/nix/store/r29gp232igs3m47s7lfcaalfashd82bf-tzdata-2025c/share/zoneinfo"
+[0;1;32mExecStart=[0m/nix/store/1k2fmjkilf7k7s5xkra1bvznp8rbzdbk-hermes-agent-2026.6.5/bin/hermes gateway run --replace
+[0;1;32mGroup=[0musers
+[0;1;32mRestart=[0mon-failure
+[0;1;32mRestartSec=[0m15s
+[0;1;32mStartLimitBurst=[0m5
+[0;1;32mStartLimitIntervalSec=[0m300
+[0;1;32mType=[0msimple
+[0;1;32mUser=[0muser
+[0;1;32mWorkingDirectory=[0m/home/user/workspace
+
+[0;1;36m[Install][0m
+[0;1;32mWantedBy=[0mmulti-user.target

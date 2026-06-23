@@ -411,10 +411,7 @@
         "impermanence": "impermanence",
         "llm-agents": "llm-agents",
         "nixpkgs": "nixpkgs_4",
-        "swagwatch-engine": "swagwatch-engine",
-        "uriel": "uriel",
-        "watchtower": "watchtower",
-        "weaver": "weaver"
+        "swagwatch-engine": "swagwatch-engine"
       }
     },
     "rust-overlay": {
@@ -588,61 +585,6 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
-      }
-    },
-    "uriel": {
-      "inputs": {
-        "flake-utils": "flake-utils_3",
-        "nixpkgs": "nixpkgs_7"
-      },
-      "locked": {
-        "lastModified": 1782037444,
-        "narHash": "sha256-1zfqaQmSPRv6dc1yasxMtU/T1s5jRAjW+VjScW9rr5c=",
-        "ref": "refs/heads/master",
-        "rev": "beb8ed9456d40ca265f101e035bc8475ba1abb83",
-        "revCount": 51,
-        "type": "git",
-        "url": "ssh://git@gitlab.com/arelaxedscholar-group/uriel.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@gitlab.com/arelaxedscholar-group/uriel.git"
-      }
-    },
-    "watchtower": {
-      "inputs": {
-        "flake-utils": "flake-utils_4",
-        "nixpkgs": "nixpkgs_8",
-        "rust-overlay": "rust-overlay_3"
-      },
-      "locked": {
-        "lastModified": 1781681820,
-        "narHash": "sha256-86PHfZhyXY3YgsGahwzl2wcP1K2Wj7X+Vpb9cpTpGrc=",
-        "ref": "refs/heads/main",
-        "rev": "464fb957bb8712786538cc95a24be00eff49267f",
-        "revCount": 22,
-        "type": "git",
-        "url": "ssh://git@gitlab.com/swagwatch/observability/watchtower.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@gitlab.com/swagwatch/observability/watchtower.git"
-      }
-    },
-    "weaver": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1781737340,
-        "narHash": "sha256-7tiidD9FGZqwUyP4NxXxXHp/vAQqwechNUOpajjWz1M=",
-        "ref": "refs/heads/main",
-        "rev": "8c1f3b49bf9df3928a3b5600da5411cfe270190f",
-        "revCount": 7,
-        "type": "git",
-        "url": "ssh://git@gitlab.com/swagwatch/growth/weaver.git"
-      },
-      "original": {
-        "type": "git",
-        "url": "ssh://git@gitlab.com/swagwatch/growth/weaver.git"
       }
     }
   },

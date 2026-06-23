@@ -166,20 +166,20 @@ in
 
         mkdir -p "$HERMES_HOME"
 
-        # Generate config.yaml if it doesn't exist
+        # Generate config.yaml if it doesn't exist (never overwrite)
         if [ ! -f "$HERMES_HOME/config.yaml" ]; then
           ${hermesPkg}/bin/hermes config --init 2>/dev/null || true
         fi
 
-        # Merge env file
+        # Merge env file — only seed if .env doesn't already exist
         if [ -n "${cfg.envFile}" ] && [ -f "${cfg.envFile}" ]; then
-          if [ "${cfg.envFile}" != "$HERMES_HOME/.env" ]; then
-            # install removes old file first so owner is always hermes
+          if [ "${cfg.envFile}" != "$HERMES_HOME/.env" ] && [ ! -f "$HERMES_HOME/.env" ]; then
             install -m 0664 "${cfg.envFile}" "$HERMES_HOME/.env"
           fi
         fi
 
-        if [ "${if cfg.memoryProvider != null then cfg.memoryProvider else ""}" = "honcho" ]; then
+        # Write honcho.json only if it doesn't exist (never overwrite user config)
+        if [ "${if cfg.memoryProvider != null then cfg.memoryProvider else ""}" = "honcho" ] && [ ! -f "$HERMES_HOME/honcho.json" ]; then
           mkdir -p "$HERMES_HOME"
           cat > "$HERMES_HOME/honcho.json" <<EOF
 {
@@ -201,8 +201,8 @@ EOF
         install -d -m 0700 -o ${cfg.user} -g ${cfg.group} "$HERMES_HOME"
 
         # Ensure config.yaml is owned by Hermes, readable only by user+group (non-recursive, non-group-write)
-        chown ${cfg.user}:${cfg.group} "$HERMES_HOME/config.yaml"
-        chmod 0640 "$HERMES_HOME/config.yaml"
+        chown ${cfg.user}:${cfg.group} "$HERMES_HOME/config.yaml" 2>/dev/null || true
+        chmod 0640 "$HERMES_HOME/config.yaml" 2>/dev/null || true
       '';
     };
 
@@ -260,10 +260,12 @@ EOF
         Type = "simple";
         User = cfg.user;
         Group = cfg.group;
-        ExecStart = "${hermesPkg}/bin/hermes gateway run";
+        ExecStart = "${hermesPkg}/bin/hermes gateway run --replace";
         WorkingDirectory = "${cfg.stateDir}/workspace";
         Restart = "on-failure";
-        RestartSec = "5s";
+        RestartSec = "15s";
+        StartLimitIntervalSec = 300;
+        StartLimitBurst = 5;
       };
     };
 

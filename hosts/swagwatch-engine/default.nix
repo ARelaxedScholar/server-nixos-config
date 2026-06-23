@@ -16,9 +16,9 @@
     ../../services/moondream.nix
     ../../services/hermes.nix
     ../../services/homelab-health.nix
-    ../../services/watchtower.nix
-    ../../services/weaver.nix
-    ../../services/uriel.nix
+    # ../../services/watchtower.nix
+    # ../../services/weaver.nix
+    # ../../services/uriel.nix
     ../../services/forge.nix
   ];
 
@@ -178,7 +178,6 @@
     ensureDatabases = [
       "animus"
       "swagwatch"
-      "watchtower"
     ];
     ensureUsers = [
       {
@@ -187,10 +186,6 @@
       }
       {
         name = "swagwatch";
-        ensureDBOwnership = true;
-      }
-      {
-        name = "watchtower";
         ensureDBOwnership = true;
       }
     ];
@@ -347,7 +342,7 @@
   };
 
   services.hermes = {
-    enable = true;
+    enable = false;  # disabled in favor of per-profile gateway units below
     manageUser = false;
     user = "user";
     group = "users";
@@ -356,29 +351,34 @@
   };
 
   # --- Hermes Agent gateways ---
+systemd.services.hermes-gateway = {
+  description = "Hermes Agent gateway — Ariel (default) profile";
+  wantedBy = [ "multi-user.target" ];
+  after = [
+    "network-online.target"
+    "hermes-init-config.service"
+  ];
+  wants = [ "network-online.target" ];
+  requires = [ "hermes-init-config.service" ];
 
-  systemd.services.hermes-gateway = {
-    description = "Hermes Agent gateway — Ariel (default) profile";
-    wantedBy = [ "multi-user.target" ];
-    after = [
-      "network-online.target"
-      "hermes-init-config.service"
-    ];
-    wants = [ "network-online.target" ];
-    requires = [ "hermes-init-config.service" ];
-    environment = {
-      HERMES_HOME = "/home/user/.hermes";
-    };
-    serviceConfig = {
-      Type = "simple";
-      User = "user";
-      Group = "users";
-      ExecStart = "/run/current-system/sw/bin/hermes gateway run";
-      WorkingDirectory = "/home/user";
-      Restart = "on-failure";
-      RestartSec = "5s";
-    };
+  environment = {
+    HOME = "/home/user";
+    HERMES_HOME = "/home/user/.hermes";
   };
+
+  serviceConfig = {
+    Type = "simple";
+    User = "user";
+    Group = "users";
+    WorkingDirectory = "/home/user";
+    EnvironmentFile = [ "-/persist/etc/secrets/hermes.env" ];
+    ExecStart = "/run/current-system/sw/bin/hermes gateway run --replace";
+    Restart = "on-failure";
+    RestartSec = "15s";
+    StartLimitIntervalSec = 300;
+    StartLimitBurst = 5;
+  };
+};
 
   systemd.services.hermes-midas-gateway = {
     description = "Hermes Agent gateway — Midas profile";
@@ -396,7 +396,6 @@
       HOME = "/home/user";
       HERMES_HOME = "/home/user/.hermes";
       HERMES_PROFILE = "midas";
-      PYTHONPATH = "/home/user/.hermes/.venv/lib/python3.13/site-packages";
     };
     path = [
       pkgs.openssh
@@ -408,10 +407,12 @@
       Group = "users";
       WorkingDirectory = "/home/user";
       EnvironmentFile = [ "-/persist/etc/secrets/midas.env" ];
-      ExecStart = "/run/current-system/sw/bin/hermes -p midas gateway run";
+      ExecStart = "/run/current-system/sw/bin/hermes -p midas gateway run --replace";
       Restart = "on-failure";
-      RestartSec = "5s";
+      RestartSec = "15s";
       TimeoutStopSec = "240s";
+      StartLimitIntervalSec = 300;
+      StartLimitBurst = 5;
     };
   };
 
@@ -448,10 +449,12 @@
       Group = "users";
       WorkingDirectory = "/home/user";
       EnvironmentFile = [ "-/persist/etc/secrets/musa.env" ];
-      ExecStart = "/run/current-system/sw/bin/hermes -p musa gateway run";
+      ExecStart = "/run/current-system/sw/bin/hermes -p musa gateway run --replace";
       Restart = "on-failure";
-      RestartSec = "5s";
+      RestartSec = "15s";
       TimeoutStopSec = "240s";
+      StartLimitIntervalSec = 300;
+      StartLimitBurst = 5;
     };
   };
 
@@ -552,24 +555,24 @@
 
   # --- Other services ---
 
-  services.watchtower = {
-    enable = true;
-    envFile = /persist/etc/secrets/watchtower.env;
-  };
+#  services.watchtower = {
+#    enable = false;
+#    envFile = /persist/etc/secrets/watchtower.env;
+#  };
 
-  services.weaver = {
-    enable = true;
-    envFile = /persist/etc/secrets/weaver.env;
-    enableIntelligence = true;
-    enableLeadgen = true;
-  };
+#  services.weaver = {
+#    enable = false;
+#    envFile = /persist/etc/secrets/weaver.env;
+#    enableIntelligence = true;
+#    enableLeadgen = true;
+#  };
 
-  services.uriel = {
-    enable = true;
-    envFile = /persist/etc/secrets/uriel.env;
-    soulFile = /persist/etc/secrets/soul.md;
-    sys1Stub = false;
-  };
+#  services.uriel = {
+#    enable = false;
+#    envFile = /persist/etc/secrets/uriel.env;
+#    soulFile = /persist/etc/secrets/soul.md;
+#    sys1Stub = false;
+#  };
 
   services.openshell = {
     enable = true;
@@ -641,24 +644,24 @@
         mode = "0700";
       }
       "/var/lib/animus"
-      {
-        directory = "/var/lib/watchtower";
-        user = "watchtower";
-        group = "watchtower";
-        mode = "0750";
-      }
-      {
-        directory = "/var/lib/weaver";
-        user = "weaver";
-        group = "weaver";
-        mode = "0750";
-      }
-      {
-        directory = "/var/lib/uriel";
-        user = "uriel";
-        group = "uriel";
-        mode = "0755";
-      }
+#      {
+#        directory = "/var/lib/watchtower";
+#        user = "watchtower";
+#        group = "watchtower";
+#        mode = "0750";
+#      }
+#      {
+#        directory = "/var/lib/weaver";
+#        user = "weaver";
+#        group = "weaver";
+#        mode = "0750";
+#      }
+#      {
+#        directory = "/var/lib/uriel";
+#        user = "uriel";
+#        group = "uriel";
+#        mode = "0755";
+#      }
       "/home/user/"
       "/persist/cache"
     ];
