@@ -1,8 +1,9 @@
 {
+  config,
   pkgs,
   lib,
-  ...
-}:
+  swagwatch-engine,
+  ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -342,7 +343,7 @@
   };
 
   services.hermes = {
-    enable = false;  # disabled in favor of per-profile gateway units below
+    enable = true;  # disabled in favor of per-profile gateway units below
     manageUser = false;
     user = "user";
     group = "users";
@@ -680,6 +681,8 @@ systemd.services.hermes-gateway = {
     chromium
     nh
     llama-cpp
+    python3
+    dig
   ];
 
   programs.nix-ld.enable = true;

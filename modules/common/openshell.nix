@@ -121,7 +121,8 @@ in
       # Owner uid 998 is the sandbox user in the base image.  Group users keeps
       # the host login user able to inspect/edit persisted work without making
       # the workspace world-writable.
-      ++ (map (name: "d ${persistentRoot}/${name}/workspace 0775 998 users -") sandboxNames);
+      ++ (map (name: "d ${persistentRoot}/${name}/workspace 0775 998 users -") sandboxNames)
+      ++ (map (name: "d ${persistentRoot}/${name}/ssh 0700 root root -") sandboxNames);
 
     # Write gateway config and sandbox creation templates.
     environment.etc = {
@@ -301,6 +302,31 @@ EOF
             echo "Restored /sandbox/.env ($(wc -c < "$env_src") bytes)"
           else
             echo "No Hermes .env for $sandbox at $env_src; skipping"
+          fi
+
+          # Restore persistent SSH host key so the key survives container recreation.
+          # Without this, every sandbox recreate changes the host key and breaks the
+          # Hermes SSH backend (stale entry in /home/user/.ssh/known_hosts).
+          # We read the key via a privileged container with /persist mounted because
+          # the Docker daemon may not have read access to /persist/openshell/*/ssh/.
+          host_key_dir="${persistentRoot}/$sandbox/ssh"
+          if [ -f "$host_key_dir/ssh_host_ed25519_key" ] && [ -f "$host_key_dir/ssh_host_ed25519_key.pub" ]; then
+            docker run --rm -v /persist:/persist alpine sh -c \
+              'cat /persist/openshell/'"$sandbox"'/ssh/ssh_host_ed25519_key' \
+              | docker exec -i "$container" bash -lc '
+                  cat > /etc/ssh/ssh_host_ed25519_key
+                  chmod 600 /etc/ssh/ssh_host_ed25519_key
+                '
+            docker run --rm -v /persist:/persist alpine sh -c \
+              'cat /persist/openshell/'"$sandbox"'/ssh/ssh_host_ed25519_key.pub' \
+              | docker exec -i "$container" bash -lc '
+                  cat > /etc/ssh/ssh_host_ed25519_key.pub
+                  chmod 644 /etc/ssh/ssh_host_ed25519_key.pub
+                '
+            docker exec "$container" bash -lc 'service ssh restart >/dev/null 2>&1 || true'
+            echo "Restored persistent SSH host key for $sandbox"
+          else
+            echo "No persistent host key for $sandbox; container will use its own (will change on next recreate)"
           fi
 
           # Ensure SSH key auth is set up
