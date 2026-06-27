@@ -20,7 +20,7 @@
     # Watchtower, Weaver, and Uriel are disabled because their GitLab SSH
     # remotes cannot be fetched during nix build (no SSH agent in sandbox).
     # Re-enable once GitLab deploy tokens or HTTPS auth is configured.
-    # watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
+    watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
     # uriel = {
     #   url = "git+ssh://git@gitlab.com/arelaxedscholar-group/uriel.git";
     #   flake = true;
@@ -65,7 +65,7 @@
             llm-agents = inputs.llm-agents;
             swagwatch-engine = inputs.swagwatch-engine;
             forge = inputs.forge;
-            # watchtower = inputs.watchtower;
+            watchtower = inputs.watchtower;
             # weaver = inputs.weaver;
             # uriel = inputs.uriel;
             inherit openshell-pkg;

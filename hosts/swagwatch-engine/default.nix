@@ -17,7 +17,7 @@
     ../../services/moondream.nix
     ../../services/hermes.nix
     ../../services/homelab-health.nix
-    # ../../services/watchtower.nix
+    ../../services/watchtower.nix
     # ../../services/weaver.nix
     # ../../services/uriel.nix
     ../../services/forge.nix
@@ -556,10 +556,10 @@ systemd.services.hermes-gateway = {
 
   # --- Other services ---
 
-#  services.watchtower = {
-#    enable = false;
-#    envFile = /persist/etc/secrets/watchtower.env;
-#  };
+  services.watchtower = {
+    enable = true;
+    envFile = /persist/etc/secrets/watchtower.env;
+  };
 
 #  services.weaver = {
 #    enable = false;
