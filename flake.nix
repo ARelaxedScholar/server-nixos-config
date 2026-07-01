@@ -8,7 +8,7 @@
     impermanence.url = "github:nix-community/impermanence";
     animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
-    llm-agents.url =                                                                                                "git+https://github.com/numtide/llm-agents.nix?rev=53673313e86582f3ac7050ff826158fd843c219d";
+    llm-agents.url = "git+https://github.com/numtide/llm-agents.nix?rev=53673313e86582f3ac7050ff826158fd843c219d";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
 
     # Forge is developed locally on this host for now. Use a path input so the
@@ -80,7 +80,9 @@
         };
 
         thesentry = mkHost {
-          extraSpecialArgs = { llm-agents = inputs.llm-agents; };
+          extraSpecialArgs = {
+            llm-agents = inputs.llm-agents;
+          };
           modules = [
             ./modules/common/base.nix
             ./hosts/thesentry/default.nix
