@@ -84,6 +84,24 @@ in
       '';
       example = "/home/user/.hermes";
     };
+
+    kanban = lib.mkOption {
+      type = lib.types.attrs;
+      default = {};
+      description = ''
+        Kanban board configuration merged into config.yaml.
+        Example: { orchestrator_profile = "default"; default_assignee = "default"; }
+      '';
+    };
+
+    kanbanDecomposer = lib.mkOption {
+      type = lib.types.nullOr lib.types.attrs;
+      default = null;
+      description = ''
+        Auxiliary model config for the kanban decomposer.
+        Example: { provider = "deepseek"; model = "deepseek-v4-flash"; api_key = "sk-..."; }
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -206,6 +224,53 @@ EOF
       '';
     };
 
+    # Apply kanban + decomposer config declaratively (runs after init-config)
+    systemd.services.hermes-kanban-config = lib.mkIf (cfg.kanban != {} || cfg.kanbanDecomposer != null) {
+      description = "Apply kanban board configuration to Hermes config.yaml";
+      requiredBy = [ "hermes-agent.service" ];
+      after = [ "hermes-init-config.service" ];
+      before = [ "hermes-agent.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = cfg.user;
+        Group = cfg.group;
+      };
+      script = let
+        kd = cfg.kanbanDecomposer;
+        triageCfg = lib.optionalString (kd != null && kd.provider != null) ''
+          ${hermesPkg}/bin/hermes config set auxiliary.triage_specifier.provider ${toString kd.provider}
+          ${hermesPkg}/bin/hermes config set auxiliary.triage_specifier.model ${toString (kd.model or "")}
+          ${hermesPkg}/bin/hermes config set auxiliary.triage_specifier.base_url ${toString (kd.base_url or "")}
+        '' + lib.optionalString (kd != null && kd.api_key_env != null) ''
+          ${hermesPkg}/bin/hermes config set auxiliary.triage_specifier.api_key_env ${toString kd.api_key_env}
+        '';
+        decompCfg = lib.optionalString (kd != null) (
+          (lib.optionalString (kd.provider != null) ''
+            ${hermesPkg}/bin/hermes config set auxiliary.kanban_decomposer.provider ${toString kd.provider}
+          '') +
+          (lib.optionalString (kd.model != null) ''
+            ${hermesPkg}/bin/hermes config set auxiliary.kanban_decomposer.model ${toString kd.model}
+          '') +
+          (lib.optionalString (kd.base_url != null) ''
+            ${hermesPkg}/bin/hermes config set auxiliary.kanban_decomposer.base_url ${toString kd.base_url}
+          '') +
+          (lib.optionalString (kd.api_key_env != null) ''
+            ${hermesPkg}/bin/hermes config set auxiliary.kanban_decomposer.api_key_env ${toString kd.api_key_env}
+          '') +
+          (lib.optionalString (kd.api_key != null) ''
+            ${hermesPkg}/bin/hermes config set auxiliary.kanban_decomposer.api_key ${toString kd.api_key}
+          '')
+        );
+      in ''
+        HERMES_HOME="${cfg.stateDir}/.hermes"
+        export HERMES_HOME
+        ${hermesPkg}/bin/hermes config set kanban.orchestrator_profile ${toString (cfg.kanban.orchestrator_profile or "")}
+        ${hermesPkg}/bin/hermes config set kanban.dispatch_in_gateway ${lib.boolToString (cfg.kanban.dispatch_in_gateway or true)}
+        ${hermesPkg}/bin/hermes config set kanban.auto_decompose ${lib.boolToString (cfg.kanban.auto_decompose or true)}
+        ${hermesPkg}/bin/hermes config set kanban.failure_limit ${toString (cfg.kanban.failure_limit or 2)}
+      '' + decompCfg + triageCfg;
+    };
+
     systemd.services.hermes-memory-setup = {
       description = "Configure Hermes memory provider";
       requiredBy = [ "hermes-init-config.service" ];
@@ -266,6 +331,26 @@ EOF
         RestartSec = "15s";
         StartLimitIntervalSec = 300;
         StartLimitBurst = 5;
+      };
+    };
+
+    # Web dashboard for kanban board, sessions, config
+    systemd.services.hermes-dashboard = {
+      description = "Hermes Agent Web Dashboard";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "hermes-agent.service" ];
+      requires = [ "hermes-agent.service" ];
+
+      environment.HERMES_HOME = "${cfg.stateDir}/.hermes";
+
+      serviceConfig = {
+        Type = "simple";
+        User = cfg.user;
+        Group = cfg.group;
+        ExecStart = "${hermesPkg}/bin/hermes dashboard --port 9119 --host 127.0.0.1 --no-open";
+        WorkingDirectory = "${cfg.stateDir}/workspace";
+        Restart = "on-failure";
+        RestartSec = "10s";
       };
     };
 

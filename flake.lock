@@ -176,24 +176,6 @@
         "type": "github"
       }
     },
-    "flake-utils_4": {
-      "inputs": {
-        "systems": "systems_5"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "forge": {
       "inputs": {
         "nixpkgs": [
@@ -373,22 +355,6 @@
     },
     "nixpkgs_7": {
       "locked": {
-        "lastModified": 1781074563,
-        "narHash": "sha256-md8WlXOlfnIeHeOScMTTHFyf2d6iaTwPl2apR5EQ3P4=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "9ae611a455b90cf061d8f332b977e387bda8e1ca",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_8": {
-      "locked": {
         "lastModified": 1751274312,
         "narHash": "sha256-/bVBlRpECLVzjV19t5KMdMFWSwKLtb5RyXdjz3LJT+g=",
         "owner": "NixOS",
@@ -411,7 +377,8 @@
         "impermanence": "impermanence",
         "llm-agents": "llm-agents",
         "nixpkgs": "nixpkgs_4",
-        "swagwatch-engine": "swagwatch-engine"
+        "swagwatch-engine": "swagwatch-engine",
+        "watchtower": "watchtower"
       }
     },
     "rust-overlay": {
@@ -478,11 +445,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1782039437,
-        "narHash": "sha256-nUmgrkuz4GW1VAUYXva16voPMnkZtQbja286AU0+Ehk=",
-        "ref": "refs/heads/ariel/scraper-throughput-tuning",
-        "rev": "f74b021dba4bd73db062d3957ad1f5b361621d3f",
-        "revCount": 438,
+        "lastModified": 1782544238,
+        "narHash": "sha256-G7KRXEg5KGAF3VZjxish8iNigoANO7iB+v56lFY0a0Y=",
+        "ref": "refs/heads/main",
+        "rev": "674357f2fd29b80c7fb4c2f478dcff89f43ed0d9",
+        "revCount": 441,
         "type": "git",
         "url": "file:///mnt/data/swagwatch-engine"
       },
@@ -551,21 +518,6 @@
         "type": "github"
       }
     },
-    "systems_5": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
@@ -585,6 +537,26 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "type": "github"
+      }
+    },
+    "watchtower": {
+      "inputs": {
+        "flake-utils": "flake-utils_3",
+        "nixpkgs": "nixpkgs_7",
+        "rust-overlay": "rust-overlay_3"
+      },
+      "locked": {
+        "lastModified": 1781681820,
+        "narHash": "sha256-86PHfZhyXY3YgsGahwzl2wcP1K2Wj7X+Vpb9cpTpGrc=",
+        "ref": "refs/heads/main",
+        "rev": "464fb957bb8712786538cc95a24be00eff49267f",
+        "revCount": 22,
+        "type": "git",
+        "url": "ssh://git@gitlab.com/swagwatch/observability/watchtower.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@gitlab.com/swagwatch/observability/watchtower.git"
       }
     }
   },

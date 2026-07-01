@@ -48,6 +48,18 @@ in
     group = "user";
     stateDir = "/home/user";
     envFile = "/home/user/.hermes/.env";
+    kanban = {
+      orchestrator_profile = "default";
+      dispatch_in_gateway = true;
+      auto_decompose = true;
+      failure_limit = 2;
+    };
+    kanbanDecomposer = {
+      provider = "deepseek";
+      model = "deepseek-v4-flash";
+      base_url = "https://api.deepseek.com/v1";
+      api_key_env = "DEEPSEEK_API_KEY";
+    };
   };
 
   users.users.user = {

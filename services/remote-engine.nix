@@ -50,6 +50,10 @@ in
       # Tell the caption worker where to find Moondream (via Ollama)
       # Port 11434 is hardcoded in ollama.rs, hostname only here
       OLLAMA_HOST = "http://127.0.0.1";
+
+      # Evolutionary program generation token bounds
+      MIN_GENERATION_TOKENS = "8";
+      MAX_GENERATION_TOKENS = "30";
     };
 
     path = with pkgs; [
