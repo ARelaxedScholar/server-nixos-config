@@ -19,7 +19,7 @@
     ../../services/homelab-health.nix
     ../../services/watchtower.nix
     # ../../services/weaver.nix
-    # ../../services/uriel.nix
+    ../../services/uriel.nix
     ../../services/forge.nix
   ];
 
@@ -568,12 +568,12 @@ systemd.services.hermes-gateway = {
 #    enableLeadgen = true;
 #  };
 
-#  services.uriel = {
-#    enable = false;
-#    envFile = /persist/etc/secrets/uriel.env;
-#    soulFile = /persist/etc/secrets/soul.md;
-#    sys1Stub = false;
-#  };
+  services.uriel = {
+    enable = true;
+    envFile = /persist/etc/secrets/uriel.env;
+    soulFile = /persist/etc/secrets/soul.md;
+    sys1Stub = false;
+  };
 
   services.openshell = {
     enable = true;
@@ -657,12 +657,12 @@ systemd.services.hermes-gateway = {
 #        group = "weaver";
 #        mode = "0750";
 #      }
-#      {
-#        directory = "/var/lib/uriel";
-#        user = "uriel";
-#        group = "uriel";
-#        mode = "0755";
-#      }
+      {
+        directory = "/var/lib/uriel";
+        user = "uriel";
+        group = "uriel";
+        mode = "0755";
+      }
       "/home/user/"
       "/persist/cache"
     ];

@@ -17,14 +17,14 @@
     forge.url = "path:/home/user/workspace/forge";
     forge.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Watchtower, Weaver, and Uriel are disabled because their GitLab SSH
-    # remotes cannot be fetched during nix build (no SSH agent in sandbox).
+    # Weaver is disabled because its GitLab SSH remote cannot be fetched
+    # during nix build (no SSH agent in sandbox).
     # Re-enable once GitLab deploy tokens or HTTPS auth is configured.
     watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
-    # uriel = {
-    #   url = "git+ssh://git@gitlab.com/arelaxedscholar-group/uriel.git";
-    #   flake = true;
-    # };
+    uriel = {
+      url = "git+ssh://git@gitlab.com/arelaxedscholar-group/uriel.git";
+      flake = true;
+    };
     # weaver = {
     #   url = "git+ssh://git@gitlab.com/swagwatch/growth/weaver.git";
     #   flake = false;
@@ -67,7 +67,7 @@
             forge = inputs.forge;
             watchtower = inputs.watchtower;
             # weaver = inputs.weaver;
-            # uriel = inputs.uriel;
+            uriel = inputs.uriel;
             inherit openshell-pkg;
           };
           modules = [
