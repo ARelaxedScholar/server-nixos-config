@@ -24,6 +24,19 @@
   ];
 
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      pythonPackagesExtensions = (prev.pythonPackagesExtensions or []) ++ [
+        (pyFinal: pyPrev: {
+          sse-starlette = pyPrev.sse-starlette.overridePythonAttrs (old: {
+            doCheck = false;
+            propagatedBuildInputs = (old.propagatedBuildInputs or []) ++ [ pyPrev.starlette ];
+          });
+        })
+      ];
+    })
+  ];
+
   networking.hostName = "swagwatch-engine";
   networking.hostId = "b4dc0ff3";
   networking.useDHCP = true;
@@ -53,6 +66,7 @@
       ];
     }
   ];
+  nixpkgs.config.permittedInsecurePackages = [ "minio-2025-10-15T17-29-55Z" ];
   nix.settings.auto-optimise-store = true;
   nix.settings.substituters = [
     "https://cache.numtide.com"
