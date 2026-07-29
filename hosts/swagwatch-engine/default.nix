@@ -170,7 +170,10 @@
 
   boot.initrd.systemd.enable = true;
 
-  services.tailscale.enable = true;
+  services.tailscale = {
+enable = true;
+extraSetFlags = [ "--ssh" ];
+};
 
   services.forge = {
     enable = true;
@@ -206,7 +209,7 @@
     ];
     settings = {
       io_method = "io_uring";
-      shared_buffers = "4GB";
+      shared_buffers = "2GB";
       work_mem = "128MB";
       max_connections = "100";
       autovacuum_naptime = "1min";

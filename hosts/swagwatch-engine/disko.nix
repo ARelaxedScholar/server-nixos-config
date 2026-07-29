@@ -69,6 +69,7 @@
           xattr = "sa";
         };
         options.ashift = "12";
+        options.autotrim = "on";
         datasets = {
           "root" = {
             type = "zfs_fs";

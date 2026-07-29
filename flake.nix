@@ -9,8 +9,7 @@
     animus.url = "github:ARelaxedScholar/Animus";
     animus.inputs.nixpkgs.follows = "nixpkgs";
     llm-agents.url = "git+https://github.com/numtide/llm-agents.nix?rev=53673313e86582f3ac7050ff826158fd843c219d";
-    swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine";
-    swagwatch-engine.inputs.nixpkgs.follows = "nixpkgs";
+    swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine?ref=main";
     swagwatch-engine.inputs.nixpkgs.follows = "nixpkgs";
 
     # Forge is developed locally on this host for now.

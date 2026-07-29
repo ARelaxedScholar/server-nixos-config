@@ -98,7 +98,7 @@ in
         User = cfg.user;
         Restart = "always";
         RestartSec = "10s";
-        MemoryMax = "6G";
+        MemoryMax = "10G";
 
         ExecStart = "${cfg.package}/bin/ollama serve";
 
