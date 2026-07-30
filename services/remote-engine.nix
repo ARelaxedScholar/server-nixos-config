@@ -53,6 +53,11 @@ in
       CAPTION_WORKER_ENABLED = "false";
       MATERIAL_ENRICHMENT_WORKER_ENABLED = "false";
 
+      # A full-catalog quality snapshot is intentionally heavyweight. Run it
+      # four times per day instead of keeping the database under near-
+      # continuous audit load.
+      AUDIT_WORKER_INTERVAL_SECONDS = "21600";
+
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
 
       # Evolutionary program generation token bounds
