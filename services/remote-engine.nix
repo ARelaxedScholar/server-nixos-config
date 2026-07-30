@@ -148,6 +148,10 @@ in
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
       ExecStartPre = waitForQdrant;
+      # Qdrant can take more than 90 seconds to map and load the 2.1M-vector
+      # collection after a restart. Cover the six-minute readiness window plus
+      # both optional 30-second index warmups.
+      TimeoutStartSec = "8min";
       # Command-level values take precedence over the secret EnvironmentFile,
       # which still carries legacy audit and shadow-walk toggles.
       ExecStart = "${pkgs.coreutils}/bin/env AUDIT_WORKER_ENABLED=true CATALOG_WALK_SHADOW_ENABLED=true ${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
