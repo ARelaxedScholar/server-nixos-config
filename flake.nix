@@ -16,9 +16,11 @@
     forge.url = "path:/home/user/workspace/forge";
     forge.inputs.nixpkgs.follows = "nixpkgs";
 
-    watchtower.url = "git+ssh://git@gitlab.com/swagwatch/observability/watchtower.git";
+    # Revision-exact local mirrors keep host rebuilds independent of interactive
+    # GitLab SSH credentials. Directory suffixes identify the mirrored commits.
+    watchtower.url = "path:/mnt/data/vendor/watchtower-464fb957";
     uriel = {
-      url = "git+ssh://git@gitlab.com/arelaxedscholar-group/uriel.git";
+      url = "path:/mnt/data/vendor/uriel-9f8f92d3";
       flake = true;
     };
   };
