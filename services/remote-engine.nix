@@ -52,11 +52,11 @@ in
       CAPTION_WORKER_ENABLED = "false";
       MATERIAL_ENRICHMENT_WORKER_ENABLED = "false";
 
-      # Full quality snapshots remain operator-triggered. Shadow walks are
-      # limited to the fast, reliable Shopify catalogs validated in production;
-      # heavyweight/partial TargetWalk retailers and Kith's page-cap failure
-      # stay excluded until their walkers are repaired.
-      AUDIT_WORKER_ENABLED = "false";
+      # Retain a fresh customer-visibility snapshot every six hours. Shadow
+      # walks remain limited to the fast, reliable Shopify catalogs validated
+      # in production; heavyweight/partial TargetWalk retailers and Kith's
+      # page-cap failure stay excluded until their walkers are repaired.
+      AUDIT_WORKER_ENABLED = "true";
       AUDIT_WORKER_INTERVAL_SECONDS = "21600";
       CATALOG_WALK_SHADOW_ENABLED = "true";
       CATALOG_WALK_INTERVAL_SECONDS = "21600";
@@ -109,7 +109,7 @@ in
       WorkingDirectory = engineFlakePath;
       # Command-level values take precedence over the secret EnvironmentFile,
       # which still carries legacy audit and shadow-walk toggles.
-      ExecStart = "${pkgs.coreutils}/bin/env AUDIT_WORKER_ENABLED=false CATALOG_WALK_SHADOW_ENABLED=true ${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
+      ExecStart = "${pkgs.coreutils}/bin/env AUDIT_WORKER_ENABLED=true CATALOG_WALK_SHADOW_ENABLED=true ${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
       Restart = "always";
       RestartSec = "5s";
     };
