@@ -11,11 +11,9 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [
       "network-online.target"
-      "moondream.service"
     ];
     wants = [
       "network-online.target"
-      "moondream.service"
     ];
     unitConfig.ConditionPathExists = envFile;
 
@@ -46,10 +44,16 @@ in
       SCRAPE_CLAIM_BATCH_SIZE = "2000";
       SCRAPE_CLAIM_LEASE_HOURS = "2";
 
+      # Catalog discovery may stay broad while hydration is kept deliberately
+      # small so new-product acquisition cannot starve customer search.
+      CATALOG_ACQUISITION_CONCURRENCY = "2";
+      CATALOG_ACQUISITION_CLAIM_BATCH_SIZE = "10";
+
+      # CPU-only Ollama inference competes directly with search and discovery.
+      CAPTION_WORKER_ENABLED = "false";
+      MATERIAL_ENRICHMENT_WORKER_ENABLED = "false";
+
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
-      # Tell the caption worker where to find Moondream (via Ollama)
-      # Port 11434 is hardcoded in ollama.rs, hostname only here
-      OLLAMA_HOST = "http://127.0.0.1";
 
       # Evolutionary program generation token bounds
       MIN_GENERATION_TOKENS = "8";
@@ -75,12 +79,15 @@ in
       MemoryHigh = "12G"; # Start throttling here
       MemoryMax = "16G"; # Absolute kill limit
 
-      # Priority: Negative 'Nice' means SwagWatch gets CPU priority over Animus
-      Nice = -5;
-      CPUSchedulingPolicy = "rr";
+      # Use normal scheduling rather than real-time round-robin; CPU weights
+      # give the engine preference without allowing it to starve PostgreSQL.
+      Nice = 0;
+      CPUSchedulingPolicy = "other";
+      CPUWeight = 1000;
 
-      # Disk Priority: Direct, high-speed access to the SSD
-      IOWeight = 100;
+      # Balanced I/O priority: enough for ingestion without starving database
+      # checkpoints and query reads.
+      IOWeight = 500;
 
       # File descriptor limit: bump from default 1024 to hard limit.
       # The engine's socket backlog is 4096, and scraping/discovery/search

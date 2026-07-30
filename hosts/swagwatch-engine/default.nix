@@ -622,7 +622,9 @@ systemd.services.hermes-gateway = {
   };
 
   services.moondream = {
-    enable = true;
+    # Keep the model definition available for a future GPU or separate host,
+    # but do not run CPU-only inference on the production search machine.
+    enable = false;
     modelDir = "/persist/cache/ollama";
   };
 
