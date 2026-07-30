@@ -71,17 +71,25 @@ in
       # Keep acquisition broad enough to maintain freshness without allowing
       # scrape fan-out to exhaust the database pool or starve customer search.
       # Four domains with one active target each and eight product jobs per
-      # target still permits roughly 32 concurrent product fetches.
-      DEFAULT_SCRAPER_CONCURRENCY = "8";
-      SCRAPER_CONCURRENCY = "ssense.com:12,kith.com:10,aritzia.com:10,urban-planet.com:10,simons.ca:6,target.com:4";
+      # target overwhelmed the shared ZFS pool. Two domains with up to six
+      # product jobs each preserves acquisition breadth at roughly 12-way
+      # concurrency while leaving I/O capacity for customer search.
+      DEFAULT_SCRAPER_CONCURRENCY = "4";
+      SCRAPER_CONCURRENCY = "ssense.com:6,kith.com:6,aritzia.com:6,urban-planet.com:6,simons.ca:4,target.com:4";
       # Redis token-bucket limits: domain:burst_capacity:refill_per_second.
       # Suffix matching is supported, so asos.com also covers www.asos.com.
       SCRAPER_RATE_LIMITS = "asos.com:50:20,massimodutti.com:20:5,bershka.com:20:5,stradivarius.com:20:5,pullandbear.com:20:5,zara.com:20:5,oysho.com:20:5,kith.com:5:1.5";
       SCRAPE_DISCOVERY_CONCURRENCY = "4";
-      SCRAPE_DOMAIN_CONCURRENCY = "4";
+      SCRAPE_DOMAIN_CONCURRENCY = "2";
       SCRAPE_TARGETS_PER_DOMAIN_CONCURRENCY = "1";
       SCRAPE_CLAIM_BATCH_SIZE = "2000";
       SCRAPE_CLAIM_LEASE_HOURS = "2";
+
+      # Ledger refreshes existing products; keep them responsive without
+      # letting availability writes crowd out acquisition or customer reads.
+      LEDGER_BATCH_SIZE = "20";
+      LEDGER_DOMAIN_CONCURRENCY = "4";
+      LEDGER_JOBS_PER_DOMAIN_CONCURRENCY = "2";
 
       # Catalog discovery may stay broad while hydration is kept deliberately
       # small so new-product acquisition cannot starve customer search.
