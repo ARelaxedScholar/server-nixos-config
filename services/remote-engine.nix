@@ -4,6 +4,18 @@ let
   engineFlakePath = "/mnt/data/swagwatch-engine";
   vaultDir = "${engineFlakePath}/vault";
   envFile = "/persist/etc/secrets/remote-engine.env";
+  waitForQdrant = pkgs.writeShellScript "wait-for-qdrant" ''
+    for attempt in $(${pkgs.coreutils}/bin/seq 1 180); do
+      if ${pkgs.curl}/bin/curl --fail --silent --max-time 2 \
+        http://127.0.0.1:6333/readyz > /dev/null; then
+        exit 0
+      fi
+      ${pkgs.coreutils}/bin/sleep 2
+    done
+
+    echo "Qdrant did not become ready within 6 minutes" >&2
+    exit 1
+  '';
 in
 {
   systemd.services.remote-engine = {
@@ -11,7 +23,9 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [
       "network-online.target"
+      "qdrant.service"
     ];
+    requires = [ "qdrant.service" ];
     wants = [
       "network-online.target"
     ];
@@ -107,6 +121,7 @@ in
       # ENV
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
+      ExecStartPre = waitForQdrant;
       # Command-level values take precedence over the secret EnvironmentFile,
       # which still carries legacy audit and shadow-walk toggles.
       ExecStart = "${pkgs.coreutils}/bin/env AUDIT_WORKER_ENABLED=true CATALOG_WALK_SHADOW_ENABLED=true ${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
