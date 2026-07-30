@@ -1,9 +1,27 @@
 { config, lib, pkgs, ... }:
 
 let
+  # Camoufox 0.4.11 can emit page errors without location metadata. Playwright
+  # 1.60 assumes the metadata is always present and crashes its driver while
+  # dispatching the error. Preserve the error while tolerating a missing
+  # location until Camoufox can be upgraded as a separately tested change.
+  patchedPlaywrightDriver = pkgs.playwright-driver.overrideAttrs (oldAttrs: {
+    postInstall = (oldAttrs.postInstall or "") + ''
+      test "$(grep -c 'url: pageError.location.url' "$out/lib/coreBundle.js")" = 2
+      substituteInPlace "$out/lib/coreBundle.js" \
+        --replace-fail 'url: pageError.location.url,' 'url: pageError.location?.url ?? "",' \
+        --replace-fail 'line: pageError.location.lineNumber,' 'line: pageError.location?.lineNumber ?? 0,' \
+        --replace-fail 'column: pageError.location.columnNumber' 'column: pageError.location?.columnNumber ?? 0'
+    '';
+  });
+
   # Override nixpkgs python packages that are too old for scrapling
   pyOverrides = pkgs.python3.override {
     packageOverrides = self: super: {
+      playwright = super.playwright.override {
+        playwright-driver = patchedPlaywrightDriver;
+      };
+
       cssselect = super.cssselect.overridePythonAttrs (_: {
         version = "1.4.0";
         pyproject = true;
