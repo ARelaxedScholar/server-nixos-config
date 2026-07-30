@@ -28,19 +28,18 @@ in
       RUST_LOG = "swagwatch_engine=info,sqlx=warn,qdrant_client=warn";
       REDIS_URL = "redis://127.0.0.1:6379";
 
-      # Scraping throughput knobs.  Product concurrency widens the ingestion
-      # worker's per-collection processing windows. Scheduler knobs let the
-      # due-target backlog drain on a daily cadence instead of being capped at
-      # 100 claims per 5-minute tick. The Redis-backed DistributedRateLimiter
-      # still gates per-domain request rate.
-      DEFAULT_SCRAPER_CONCURRENCY = "40";
-      SCRAPER_CONCURRENCY = "ssense.com:64,kith.com:48,aritzia.com:48,urban-planet.com:48,simons.ca:24,target.com:16";
+      # Keep acquisition broad enough to maintain freshness without allowing
+      # scrape fan-out to exhaust the database pool or starve customer search.
+      # Four domains with one active target each and eight product jobs per
+      # target still permits roughly 32 concurrent product fetches.
+      DEFAULT_SCRAPER_CONCURRENCY = "8";
+      SCRAPER_CONCURRENCY = "ssense.com:12,kith.com:10,aritzia.com:10,urban-planet.com:10,simons.ca:6,target.com:4";
       # Redis token-bucket limits: domain:burst_capacity:refill_per_second.
       # Suffix matching is supported, so asos.com also covers www.asos.com.
       SCRAPER_RATE_LIMITS = "asos.com:50:20,massimodutti.com:20:5,bershka.com:20:5,stradivarius.com:20:5,pullandbear.com:20:5,zara.com:20:5,oysho.com:20:5,kith.com:5:1.5";
-      SCRAPE_DISCOVERY_CONCURRENCY = "16";
-      SCRAPE_DOMAIN_CONCURRENCY = "20";
-      SCRAPE_TARGETS_PER_DOMAIN_CONCURRENCY = "4";
+      SCRAPE_DISCOVERY_CONCURRENCY = "4";
+      SCRAPE_DOMAIN_CONCURRENCY = "4";
+      SCRAPE_TARGETS_PER_DOMAIN_CONCURRENCY = "1";
       SCRAPE_CLAIM_BATCH_SIZE = "2000";
       SCRAPE_CLAIM_LEASE_HOURS = "2";
 
