@@ -466,11 +466,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1785403754,
-        "narHash": "sha256-JLMM4u/FqbB4jCITphAaFGvrgjSDgnco3R2SgXbRqkA=",
+        "lastModified": 1785405681,
+        "narHash": "sha256-HNA9l5HZmMOkhndFquxrb0eG2foKxIttxaMp6owflxM=",
         "ref": "main",
-        "rev": "398ba7d6ab6b835fc40d0d6526b0cf6c19a6d83f",
-        "revCount": 483,
+        "rev": "b81334d4ae43776c54be960cb61559ae24141246",
+        "revCount": 484,
         "type": "git",
         "url": "file:///mnt/data/swagwatch-engine"
       },
