@@ -140,7 +140,7 @@ let
         [
           playwright typing-extensions lxml numpy platformdirs
           pysocks pyyaml requests tqdm
-          browserforge language-tags screeninfo ua-parser orjson
+          browserforge language-tags screeninfo ua-parser orjson geoip2
         ];
         doCheck = false;
       };

@@ -75,17 +75,11 @@
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16Z+Qa2n8ixLSSQ8="
   ];
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 14d";
-  };
-
   programs.nh = {
     enable = true;
     clean = {
       enable = true;
-      extraArgs = "--keep 5 --keep-since 14d";
+      extraArgs = "--keep 3";
     };
   };
 
