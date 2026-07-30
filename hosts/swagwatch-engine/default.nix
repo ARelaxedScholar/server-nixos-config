@@ -284,37 +284,86 @@ extraSetFlags = [ "--ssh" ];
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "zfs-backup" ''
         set -euo pipefail
+        SOURCE_DATASET="zroot/persist"
+        DEST_DATASET="datapool/backups/persist_mirror"
+        RESEED_DATASET="datapool/backups/persist_mirror_reseed"
+        PREVIOUS_DATASET="datapool/backups/persist_mirror_previous"
+
         ${pkgs.zfs}/bin/zfs list datapool/backups >/dev/null 2>&1 || ${pkgs.zfs}/bin/zfs create datapool/backups
-        ${pkgs.zfs}/bin/zfs receive -A datapool/backups/persist_mirror 2>/dev/null || true
-        ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation \
-          | grep "datapool/backups/persist_mirror@backup_" \
-          | tail -n +31 \
-          | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy -r 2>/dev/null || true
+
+        # Recover an interrupted dataset swap before attempting another backup.
+        if ! ${pkgs.zfs}/bin/zfs list "$DEST_DATASET" >/dev/null 2>&1 \
+          && ${pkgs.zfs}/bin/zfs list "$PREVIOUS_DATASET" >/dev/null 2>&1; then
+          ${pkgs.zfs}/bin/zfs rename "$PREVIOUS_DATASET" "$DEST_DATASET"
+        fi
+        if ${pkgs.zfs}/bin/zfs list "$DEST_DATASET" >/dev/null 2>&1 \
+          && ${pkgs.zfs}/bin/zfs list "$PREVIOUS_DATASET" >/dev/null 2>&1; then
+          ${pkgs.zfs}/bin/zfs destroy -r "$PREVIOUS_DATASET"
+        fi
+        if ${pkgs.zfs}/bin/zfs list "$RESEED_DATASET" >/dev/null 2>&1; then
+          ${pkgs.zfs}/bin/zfs destroy -r "$RESEED_DATASET"
+        fi
+
+        if ${pkgs.zfs}/bin/zfs list "$DEST_DATASET" >/dev/null 2>&1; then
+          RESUME_TOKEN=$(${pkgs.zfs}/bin/zfs get -H -o value receive_resume_token "$DEST_DATASET")
+          if [ "$RESUME_TOKEN" != "-" ]; then
+            ${pkgs.zfs}/bin/zfs receive -A "$DEST_DATASET"
+          fi
+        fi
+
         TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
-        SNAP_NAME="zroot/persist@backup_$TIMESTAMP"
+        SNAP_NAME="$SOURCE_DATASET@backup_$TIMESTAMP"
         ${pkgs.zfs}/bin/zfs snapshot "$SNAP_NAME"
         COMMON=""
-        for dest_snap in $(${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation -d1 datapool/backups/persist_mirror 2>/dev/null | cut -d@ -f2); do
-          if ${pkgs.zfs}/bin/zfs list "zroot/persist@$dest_snap" >/dev/null 2>&1; then
-            COMMON="$dest_snap"
-            break
-          fi
-        done
+        if ${pkgs.zfs}/bin/zfs list "$DEST_DATASET" >/dev/null 2>&1; then
+          for dest_snap in $(${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation -d1 "$DEST_DATASET" | cut -d@ -f2); do
+            if ${pkgs.zfs}/bin/zfs list "$SOURCE_DATASET@$dest_snap" >/dev/null 2>&1; then
+              COMMON="$dest_snap"
+              break
+            fi
+          done
+        fi
+
         echo "Starting ZFS replication for $SNAP_NAME (incremental from: ''${COMMON:-none, full send})..."
         if [ -n "$COMMON" ]; then
           ${pkgs.zfs}/bin/zfs send -v -I "@$COMMON" "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv \
             -o mountpoint=none -o canmount=off \
-            datapool/backups/persist_mirror
+            "$DEST_DATASET"
         else
-          ${pkgs.zfs}/bin/zfs send -v "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -Fuv \
+          ${pkgs.zfs}/bin/zfs send -v "$SNAP_NAME" | ${pkgs.zfs}/bin/zfs receive -uv \
             -o mountpoint=none -o canmount=off \
-            datapool/backups/persist_mirror
+            "$RESEED_DATASET"
+          ${pkgs.zfs}/bin/zfs list "$RESEED_DATASET@''${SNAP_NAME#*@}" >/dev/null
+
+          if ${pkgs.zfs}/bin/zfs list "$DEST_DATASET" >/dev/null 2>&1; then
+            ${pkgs.zfs}/bin/zfs rename "$DEST_DATASET" "$PREVIOUS_DATASET"
+          fi
+          if ! ${pkgs.zfs}/bin/zfs rename "$RESEED_DATASET" "$DEST_DATASET"; then
+            if ${pkgs.zfs}/bin/zfs list "$PREVIOUS_DATASET" >/dev/null 2>&1; then
+              ${pkgs.zfs}/bin/zfs rename "$PREVIOUS_DATASET" "$DEST_DATASET"
+            fi
+            exit 1
+          fi
+          if ${pkgs.zfs}/bin/zfs list "$PREVIOUS_DATASET" >/dev/null 2>&1; then
+            ${pkgs.zfs}/bin/zfs destroy -r "$PREVIOUS_DATASET"
+          fi
         fi
-        ${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation \
-          | grep "zroot/persist@backup_" \
-          | tail -n +3 \
-          | xargs -n 1 ${pkgs.zfs}/bin/zfs destroy 2>/dev/null || true
-        echo "Backup complete. 76k garments secured."
+
+        while read -r old_snapshot; do
+          if [ -n "$old_snapshot" ]; then
+            ${pkgs.zfs}/bin/zfs destroy -r "$old_snapshot"
+          fi
+        done < <(${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation -d1 "$DEST_DATASET" \
+          | tail -n +31)
+
+        while read -r old_snapshot; do
+          if [ -n "$old_snapshot" ]; then
+            ${pkgs.zfs}/bin/zfs destroy "$old_snapshot"
+          fi
+        done < <(${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation -d1 "$SOURCE_DATASET" \
+          | tail -n +3)
+
+        echo "Backup complete: $SNAP_NAME replicated to $DEST_DATASET."
       '';
     };
   };
