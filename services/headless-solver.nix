@@ -193,6 +193,31 @@ in
         "CAMOUFOX_SKIP_UPDATE=1"
         # Tell Patchright/Playwright to look in our persisted cache directory
         "PLAYWRIGHT_BROWSERS_PATH=/persist/cache/camoufox/patchright"
+        "LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [
+          pkgs.stdenv.cc.cc.lib
+          pkgs.gtk3
+          pkgs.glib
+          pkgs.pango
+          pkgs.cairo
+          pkgs.gdk-pixbuf
+          pkgs.atk
+          pkgs.dbus
+          pkgs.libx11
+          pkgs.libxcomposite
+          pkgs.libxdamage
+          pkgs.libxext
+          pkgs.libxfixes
+          pkgs.libxrandr
+          pkgs.libxrender
+          pkgs.libxcb
+          pkgs.libxcursor
+          pkgs.libxi
+          pkgs.alsa-lib
+          pkgs.freetype
+          pkgs.fontconfig
+          pkgs.nss
+          pkgs.nspr
+        ]}"
       ];
     };
   };
