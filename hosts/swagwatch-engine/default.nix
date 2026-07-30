@@ -282,6 +282,12 @@ extraSetFlags = [ "--ssh" ];
     unitConfig.OnFailure = [ "notify-failure@%p.service" ];
     serviceConfig = {
       Type = "oneshot";
+      # A full reseed can move more than 150 GiB. Keep it strictly
+      # best-effort so backup repair cannot make the customer API unusable.
+      Nice = 15;
+      CPUWeight = 10;
+      IOWeight = 10;
+      IOSchedulingClass = "idle";
       ExecStart = pkgs.writeShellScript "zfs-backup" ''
         set -euo pipefail
         SOURCE_DATASET="zroot/persist"
