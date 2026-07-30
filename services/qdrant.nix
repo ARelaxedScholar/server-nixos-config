@@ -52,8 +52,8 @@
       # Both image and text vectors are customer-facing and remain in RAM.
       # Avoid reclaiming HNSW/vector pages while the 32 GiB host still has
       # ample memory. Cold page faults otherwise dominate fresh-query latency.
-      MemoryHigh = "11G";
-      MemoryMax = "13G";
+      MemoryHigh = "13G";
+      MemoryMax = "15G";
     };
   };
 }

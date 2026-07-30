@@ -5,16 +5,42 @@ let
   vaultDir = "${engineFlakePath}/vault";
   envFile = "/persist/etc/secrets/remote-engine.env";
   waitForQdrant = pkgs.writeShellScript "wait-for-qdrant" ''
+    qdrant_ready=false
     for attempt in $(${pkgs.coreutils}/bin/seq 1 180); do
       if ${pkgs.curl}/bin/curl --fail --silent --max-time 2 \
         http://127.0.0.1:6333/readyz > /dev/null; then
-        exit 0
+        qdrant_ready=true
+        break
       fi
       ${pkgs.coreutils}/bin/sleep 2
     done
 
-    echo "Qdrant did not become ready within 6 minutes" >&2
-    exit 1
+    if [ "$qdrant_ready" != true ]; then
+      echo "Qdrant did not become ready within 6 minutes" >&2
+      exit 1
+    fi
+
+    point_id="$(
+      ${pkgs.curl}/bin/curl --fail --silent --max-time 10 \
+        --header "content-type: application/json" \
+        --data '{"limit":1,"with_payload":false,"with_vector":false}' \
+        http://127.0.0.1:6333/collections/swagwatch_index/points/scroll \
+        | ${pkgs.jq}/bin/jq --raw-output '.result.points[0].id // empty'
+    )"
+
+    if [ -z "$point_id" ]; then
+      echo "Qdrant collection has no point available for index warmup" >&2
+    else
+      for vector_name in text image; do
+        if ! ${pkgs.curl}/bin/curl --fail --silent --max-time 30 \
+          --header "content-type: application/json" \
+          --data "{\"query\":\"$point_id\",\"using\":\"$vector_name\",\"limit\":500,\"params\":{\"exact\":false,\"quantization\":{\"rescore\":false}},\"with_payload\":false}" \
+          http://127.0.0.1:6333/collections/swagwatch_index/points/query \
+          > /dev/null; then
+          echo "Qdrant $vector_name index warmup failed; continuing with a cold index" >&2
+        fi
+      done
+    fi
   '';
 in
 {
