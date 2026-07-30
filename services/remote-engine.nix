@@ -52,11 +52,15 @@ in
       CAPTION_WORKER_ENABLED = "false";
       MATERIAL_ENRICHMENT_WORKER_ENABLED = "false";
 
-      # Full quality snapshots and shadow walks are operator-triggered while
-      # they are being evaluated; neither may contend with customer traffic.
+      # Full quality snapshots remain operator-triggered. Shadow walks are
+      # limited to the fast, reliable Shopify catalogs validated in production;
+      # heavyweight/partial TargetWalk retailers and Kith's page-cap failure
+      # stay excluded until their walkers are repaired.
       AUDIT_WORKER_ENABLED = "false";
       AUDIT_WORKER_INTERVAL_SECONDS = "21600";
-      CATALOG_WALK_SHADOW_ENABLED = "false";
+      CATALOG_WALK_SHADOW_ENABLED = "true";
+      CATALOG_WALK_INTERVAL_SECONDS = "21600";
+      CATALOG_WALK_DOMAINS = "aimeleondore.com,aloyoga.com,fearofgod.com,jjjjound.com,johnelliott.com,ksubi.com,mnml.la,octobersveryown.com,representclo.com,rh-ude.com,us.bape.com,wearebraindead.com";
 
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
 
@@ -104,8 +108,8 @@ in
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
       # Command-level values take precedence over the secret EnvironmentFile,
-      # which still carries a legacy shadow-walk toggle.
-      ExecStart = "${pkgs.coreutils}/bin/env AUDIT_WORKER_ENABLED=false CATALOG_WALK_SHADOW_ENABLED=false ${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
+      # which still carries legacy audit and shadow-walk toggles.
+      ExecStart = "${pkgs.coreutils}/bin/env AUDIT_WORKER_ENABLED=false CATALOG_WALK_SHADOW_ENABLED=true ${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
       Restart = "always";
       RestartSec = "5s";
     };
