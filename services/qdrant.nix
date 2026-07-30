@@ -50,10 +50,10 @@
       # manage (and conflict with) the directory.
       StateDirectory = lib.mkForce "";
       # Both image and text vectors are customer-facing and remain in RAM.
-      # The 32 GiB host has enough headroom for the roughly 8 GiB steady
-      # collection while preserving space for PostgreSQL and the engine.
-      MemoryHigh = "9G";
-      MemoryMax = "11G";
+      # Avoid reclaiming HNSW/vector pages while the 32 GiB host still has
+      # ample memory. Cold page faults otherwise dominate fresh-query latency.
+      MemoryHigh = "11G";
+      MemoryMax = "13G";
     };
   };
 }
