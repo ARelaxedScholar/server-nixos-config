@@ -52,10 +52,11 @@ in
       CAPTION_WORKER_ENABLED = "false";
       MATERIAL_ENRICHMENT_WORKER_ENABLED = "false";
 
-      # A full-catalog quality snapshot is intentionally heavyweight. Run it
-      # four times per day instead of keeping the database under near-
-      # continuous audit load.
+      # Full quality snapshots and shadow walks are operator-triggered while
+      # they are being evaluated; neither may contend with customer traffic.
+      AUDIT_WORKER_ENABLED = "false";
       AUDIT_WORKER_INTERVAL_SECONDS = "21600";
+      CATALOG_WALK_SHADOW_ENABLED = "false";
 
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
 
