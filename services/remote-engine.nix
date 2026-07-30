@@ -103,7 +103,9 @@ in
       # ENV
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
-      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
+      # Command-level values take precedence over the secret EnvironmentFile,
+      # which still carries a legacy shadow-walk toggle.
+      ExecStart = "${pkgs.coreutils}/bin/env AUDIT_WORKER_ENABLED=false CATALOG_WALK_SHADOW_ENABLED=false ${swagwatch-engine.packages.x86_64-linux.default}/bin/swagwatch_engine";
       Restart = "always";
       RestartSec = "5s";
     };
