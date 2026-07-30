@@ -49,9 +49,11 @@
       # Impermanence already provides /var/lib/qdrant; don't let systemd
       # manage (and conflict with) the directory.
       StateDirectory = lib.mkForce "";
-      # Memory guardrails: allow up to 5GB before throttling, hard cap at 6GB
-      MemoryHigh = "5G";
-      MemoryMax = "6G";
+      # Both image and text vectors are customer-facing and remain in RAM.
+      # The 32 GiB host has enough headroom for the roughly 8 GiB steady
+      # collection while preserving space for PostgreSQL and the engine.
+      MemoryHigh = "9G";
+      MemoryMax = "11G";
     };
   };
 }

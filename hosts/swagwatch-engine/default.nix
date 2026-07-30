@@ -210,14 +210,21 @@ extraSetFlags = [ "--ssh" ];
     settings = {
       io_method = "io_uring";
       shared_buffers = "2GB";
-      work_mem = "128MB";
+      # work_mem applies per sort/hash node and per connection. A 128 MiB
+      # default can exhaust this 32 GiB host under concurrent API traffic.
+      work_mem = "32MB";
+      maintenance_work_mem = "1GB";
       max_connections = "100";
       autovacuum_naptime = "1min";
       autovacuum_vacuum_scale_factor = "0.05";
       autovacuum_analyze_scale_factor = "0.02";
+      autovacuum_vacuum_cost_limit = "2000";
       random_page_cost = "1.1";
       effective_io_concurrency = "200";
       effective_cache_size = "20GB";
+      checkpoint_timeout = "15min";
+      checkpoint_completion_target = "0.9";
+      max_wal_size = "4GB";
     };
   };
 
