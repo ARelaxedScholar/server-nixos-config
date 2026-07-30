@@ -87,8 +87,8 @@ in
 
       # Ledger refreshes existing products; keep them responsive without
       # letting availability writes crowd out acquisition or customer reads.
-      LEDGER_BATCH_SIZE = "20";
-      LEDGER_DOMAIN_CONCURRENCY = "4";
+      LEDGER_BATCH_SIZE = "10";
+      LEDGER_DOMAIN_CONCURRENCY = "2";
       LEDGER_JOBS_PER_DOMAIN_CONCURRENCY = "2";
 
       # Catalog discovery may stay broad while hydration is kept deliberately
