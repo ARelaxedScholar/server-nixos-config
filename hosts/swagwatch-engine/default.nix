@@ -363,12 +363,16 @@ extraSetFlags = [ "--ssh" ];
         done < <(${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation -d1 "$DEST_DATASET" \
           | tail -n +31)
 
+        # The destination keeps the restore history. The source only needs the
+        # newest common snapshot as the next incremental-send baseline; keeping
+        # another generation pins a full day of database churn on the small
+        # root pool and can exhaust it before the following backup.
         while read -r old_snapshot; do
           if [ -n "$old_snapshot" ]; then
             ${pkgs.zfs}/bin/zfs destroy "$old_snapshot"
           fi
         done < <(${pkgs.zfs}/bin/zfs list -H -t snapshot -o name -S creation -d1 "$SOURCE_DATASET" \
-          | tail -n +3)
+          | tail -n +2)
 
         echo "Backup complete: $SNAP_NAME replicated to $DEST_DATASET."
       '';
