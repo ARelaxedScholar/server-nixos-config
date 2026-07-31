@@ -75,7 +75,7 @@ in
       # product jobs each preserves acquisition breadth at roughly 12-way
       # concurrency while leaving I/O capacity for customer search.
       DEFAULT_SCRAPER_CONCURRENCY = "4";
-      SCRAPER_CONCURRENCY = "ssense.com:6,kith.com:6,aritzia.com:6,urban-planet.com:6,simons.ca:4,target.com:4";
+      SCRAPER_CONCURRENCY = "ssense.com:4,kith.com:4,aritzia.com:4,urban-planet.com:4,simons.ca:4,target.com:4";
       # Redis token-bucket limits: domain:burst_capacity:refill_per_second.
       # Suffix matching is supported, so asos.com also covers www.asos.com.
       SCRAPER_RATE_LIMITS = "asos.com:50:20,massimodutti.com:20:5,bershka.com:20:5,stradivarius.com:20:5,pullandbear.com:20:5,zara.com:20:5,oysho.com:20:5,kith.com:5:1.5";
