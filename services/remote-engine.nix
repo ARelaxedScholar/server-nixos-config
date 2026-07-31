@@ -82,7 +82,10 @@ in
       SCRAPE_DISCOVERY_CONCURRENCY = "4";
       SCRAPE_DOMAIN_CONCURRENCY = "2";
       SCRAPE_TARGETS_PER_DOMAIN_CONCURRENCY = "1";
-      SCRAPE_CLAIM_BATCH_SIZE = "2000";
+      # Claim only enough work to keep the two active domains fed. A 2,000-row
+      # lease did not add throughput and left large stale IN_PROGRESS batches
+      # after a restart.
+      SCRAPE_CLAIM_BATCH_SIZE = "50";
       SCRAPE_CLAIM_LEASE_HOURS = "2";
 
       # Ledger refreshes existing products; keep them responsive without
