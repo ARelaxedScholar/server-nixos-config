@@ -78,7 +78,7 @@ in
       SCRAPER_CONCURRENCY = "ssense.com:4,kith.com:4,aritzia.com:4,urban-planet.com:4,simons.ca:4,target.com:4";
       # Redis token-bucket limits: domain:burst_capacity:refill_per_second.
       # Suffix matching is supported, so asos.com also covers www.asos.com.
-      SCRAPER_RATE_LIMITS = "asos.com:50:20,massimodutti.com:20:5,bershka.com:20:5,stradivarius.com:20:5,pullandbear.com:20:5,zara.com:20:5,oysho.com:20:5,kith.com:5:1.5";
+      SCRAPER_RATE_LIMITS = "asos.com:50:20,massimodutti.com:20:5,static.massimodutti.net:50:20,bershka.com:20:5,stradivarius.com:20:5,static.e-stradivarius.net:50:20,pullandbear.com:20:5,static.pullandbear.com:50:20,zara.com:20:5,oysho.com:20:5,static.oysho.net:50:20,kith.com:5:1.5";
       SCRAPE_DISCOVERY_CONCURRENCY = "4";
       SCRAPE_DOMAIN_CONCURRENCY = "2";
       SCRAPE_TARGETS_PER_DOMAIN_CONCURRENCY = "1";
