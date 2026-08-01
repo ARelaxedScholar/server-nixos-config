@@ -103,12 +103,13 @@ in
       CAPTION_WORKER_ENABLED = "false";
       MATERIAL_ENRICHMENT_WORKER_ENABLED = "false";
 
-      # Retain a fresh customer-visibility snapshot every six hours. Shadow
-      # walks remain limited to reliable Shopify catalogs validated in
+      # Rebuild the fail-closed customer-visibility snapshot hourly so newly
+      # acquired inventory does not remain hidden for most of a workday.
+      # Shadow walks remain limited to reliable Shopify catalogs validated in
       # production. FashionNova is bounded to a durable 300-target slice;
       # Kith's page-cap failure stays excluded until its walker is repaired.
       AUDIT_WORKER_ENABLED = "true";
-      AUDIT_WORKER_INTERVAL_SECONDS = "21600";
+      AUDIT_WORKER_INTERVAL_SECONDS = "3600";
       CATALOG_WALK_SHADOW_ENABLED = "true";
       CATALOG_WALK_INTERVAL_SECONDS = "21600";
       CATALOG_WALK_DOMAINS = "aimeleondore.com,aloyoga.com,fashionnova.com,fearofgod.com,jjjjound.com,johnelliott.com,ksubi.com,mnml.la,octobersveryown.com,representclo.com,rh-ude.com,us.bape.com,wearebraindead.com";
