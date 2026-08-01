@@ -102,6 +102,10 @@ in
       # CPU-only Ollama inference competes directly with search and discovery.
       CAPTION_WORKER_ENABLED = "false";
       MATERIAL_ENRICHMENT_WORKER_ENABLED = "false";
+      # Text/image backlog work shares the ONNX encoder with customer semantic
+      # queries. A ten-item batch kept it saturated during a release compile;
+      # two items preserve steady indexing progress with larger query windows.
+      LOCAL_EMBEDDING_BATCH_SIZE = "2";
 
       # Rebuild the fail-closed customer-visibility snapshot hourly so newly
       # acquired inventory does not remain hidden for most of a workday.
