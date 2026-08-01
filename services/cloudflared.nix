@@ -15,6 +15,8 @@ in
     ingress:
       - hostname: engine.swagwatch.app
         service: http://127.0.0.1:3001
+      - hostname: api.swagwatch.app
+        service: http://127.0.0.1:3003
       - service: http_status:404
   '';
 

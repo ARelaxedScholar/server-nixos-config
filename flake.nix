@@ -11,6 +11,8 @@
     llm-agents.url = "git+https://github.com/numtide/llm-agents.nix?rev=53673313e86582f3ac7050ff826158fd843c219d";
     swagwatch-engine.url = "git+file:///mnt/data/swagwatch-engine?ref=main";
     swagwatch-engine.inputs.nixpkgs.follows = "nixpkgs";
+    swagwatch-social-api.url = "git+file:///mnt/data/swagwatch-social-api?ref=main";
+    swagwatch-social-api.inputs.nixpkgs.follows = "nixpkgs";
 
     # Forge is developed locally on this host for now.
     forge.url = "path:/home/user/workspace/forge";
@@ -58,6 +60,7 @@
             animus = inputs.animus;
             llm-agents = inputs.llm-agents;
             swagwatch-engine = inputs.swagwatch-engine;
+            swagwatch-social-api = inputs.swagwatch-social-api;
             forge = inputs.forge;
             watchtower = inputs.watchtower;
             uriel = inputs.uriel;

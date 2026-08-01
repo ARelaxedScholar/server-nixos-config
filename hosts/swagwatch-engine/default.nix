@@ -10,6 +10,7 @@
     ./disko.nix
     ../../services/cloudflared.nix
     ../../services/remote-engine.nix
+    ../../services/swagwatch-social-api.nix
     ../../services/animus.nix
     ../../services/headless-solver.nix
     ../../services/qdrant.nix
