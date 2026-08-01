@@ -51,6 +51,14 @@
   ];
   nix.settings.max-jobs = 1;
   nix.settings.cores = 2;
+  # Release compilation shares this host with the customer API. Nix build
+  # workers inherit these limits, keeping deploys from competing at equal
+  # priority with search, discovery, PostgreSQL, Redis, and Qdrant.
+  systemd.services.nix-daemon.serviceConfig = {
+    Nice = 15;
+    CPUWeight = 10;
+    IOWeight = 10;
+  };
   nix.settings.trusted-users = [
     "root"
     "user"
