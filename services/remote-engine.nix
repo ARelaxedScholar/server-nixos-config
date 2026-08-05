@@ -202,7 +202,7 @@ in
       Group = "users";
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
-      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/retailer_onboarding_factory run --limit 5 --brand-limit 20";
+      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/retailer_onboarding_factory run --limit 5 --brand-limit 5";
       Nice = 10;
       CPUWeight = 100;
       IOWeight = 100;
