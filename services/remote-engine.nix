@@ -177,4 +177,41 @@ in
       RestartSec = "5s";
     };
   };
+
+  # Discover and qualify a small retailer batch daily. Qualification is
+  # evidence-only: a human must explicitly approve a candidate before the
+  # engine loads its catalog walker on the next restart.
+  systemd.services.retailer-onboarding-factory = {
+    description = "SwagWatch retailer onboarding factory";
+    after = [
+      "network-online.target"
+      "remote-engine.service"
+    ];
+    wants = [ "network-online.target" ];
+    unitConfig.ConditionPathExists = envFile;
+
+    environment.RUST_LOG = "retailer_onboarding_factory=info,sqlx=warn";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "user";
+      Group = "users";
+      EnvironmentFile = envFile;
+      WorkingDirectory = engineFlakePath;
+      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/retailer_onboarding_factory run --limit 5 --brand-limit 20";
+      Nice = 10;
+      CPUWeight = 100;
+      IOWeight = 100;
+      MemoryMax = "1G";
+    };
+  };
+
+  systemd.timers.retailer-onboarding-factory = {
+    description = "Run the SwagWatch retailer onboarding factory daily";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+      RandomizedDelaySec = "2h";
+    };
+  };
 }
