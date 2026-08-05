@@ -78,7 +78,7 @@ in
       SCRAPER_CONCURRENCY = "ssense.com:4,kith.com:4,aritzia.com:4,urban-planet.com:4,simons.ca:4,target.com:4";
       # Redis token-bucket limits: domain:burst_capacity:refill_per_second.
       # Suffix matching is supported, so asos.com also covers www.asos.com.
-      SCRAPER_RATE_LIMITS = "asos.com:50:20,massimodutti.com:20:5,static.massimodutti.net:50:20,bershka.com:20:5,stradivarius.com:20:5,static.e-stradivarius.net:50:20,pullandbear.com:20:5,static.pullandbear.com:50:20,zara.com:20:5,oysho.com:20:5,static.oysho.net:50:20,kith.com:5:1.5";
+      SCRAPER_RATE_LIMITS = "asos.com:50:20,massimodutti.com:20:5,static.massimodutti.net:50:20,bershka.com:20:5,stradivarius.com:20:5,static.e-stradivarius.net:50:20,pullandbear.com:20:5,static.pullandbear.com:50:20,zara.com:20:5,oysho.com:20:5,static.oysho.net:50:20,kith.com:5:1.5,us.princesspolly.com:2:1,everlane.com:2:1,goodamerican.com:2:1,meshki.us:2:1,petalandpup.com:2:1";
       SCRAPE_DISCOVERY_CONCURRENCY = "4";
       SCRAPE_DOMAIN_CONCURRENCY = "2";
       SCRAPE_TARGETS_PER_DOMAIN_CONCURRENCY = "1";
@@ -118,7 +118,7 @@ in
       AUDIT_WORKER_INTERVAL_SECONDS = "86400";
       CATALOG_WALK_SHADOW_ENABLED = "true";
       CATALOG_WALK_INTERVAL_SECONDS = "21600";
-      CATALOG_WALK_DOMAINS = "aimeleondore.com,aloyoga.com,fashionnova.com,fearofgod.com,jjjjound.com,johnelliott.com,ksubi.com,mnml.la,octobersveryown.com,representclo.com,rh-ude.com,us.bape.com,wearebraindead.com";
+      CATALOG_WALK_DOMAINS = "aimeleondore.com,aloyoga.com,everlane.com,fashionnova.com,fearofgod.com,goodamerican.com,jjjjound.com,johnelliott.com,ksubi.com,meshki.us,mnml.la,octobersveryown.com,petalandpup.com,representclo.com,rh-ude.com,us.bape.com,us.princesspolly.com,wearebraindead.com";
 
       COOKIE_HARVESTER_SCRIPT_PATH = "${engineFlakePath}/scripts/harvest-cookies.js";
 
