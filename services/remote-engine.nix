@@ -202,7 +202,9 @@ in
       Group = "users";
       EnvironmentFile = envFile;
       WorkingDirectory = engineFlakePath;
-      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/retailer_onboarding_factory run --limit 5 --brand-limit 5";
+      # Discover two while probing five so the rollout backlog drains. This
+      # still introduces fresh candidates every day without starving retries.
+      ExecStart = "${swagwatch-engine.packages.x86_64-linux.default}/bin/retailer_onboarding_factory run --limit 5 --brand-limit 2";
       Nice = 10;
       CPUWeight = 100;
       IOWeight = 100;
