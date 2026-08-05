@@ -190,7 +190,12 @@ in
     wants = [ "network-online.target" ];
     unitConfig.ConditionPathExists = envFile;
 
-    environment.RUST_LOG = "retailer_onboarding_factory=info,sqlx=warn";
+    environment = {
+      RUST_LOG = "retailer_onboarding_factory=info,sqlx=warn";
+      # The API owns the main payload archive lock. Give this independent
+      # process its own archive so evidence capture cannot contend with it.
+      PAYLOAD_ARCHIVE_PATH = "${vaultDir}/retailer-onboarding-archive";
+    };
     serviceConfig = {
       Type = "oneshot";
       User = "user";
