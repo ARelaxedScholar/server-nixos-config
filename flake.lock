@@ -558,11 +558,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1786575088,
-        "narHash": "sha256-ww1FIzseu/dB3FA2Z/BkliKosT+prBiAhnMT+XdNLcg=",
+        "lastModified": 1786584380,
+        "narHash": "sha256-h3G7FuZXb3BLt0C+93KOwE5bU9H3f1usWcSxaP34CzI=",
         "ref": "main",
-        "rev": "e66ed0a973075337c8f7a34e4c0129d74b6c675e",
-        "revCount": 194,
+        "rev": "cda2927dc5b842e58e5879173c178c37162339af",
+        "revCount": 195,
         "type": "git",
         "url": "file:///mnt/data/swagwatch-social-api"
       },
