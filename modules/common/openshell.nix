@@ -430,6 +430,27 @@ EOF
           done
         fi
 
+        # systemd considers the gateway started before its gRPC listener is
+        # necessarily accepting connections.  Provisioning immediately used
+        # to skip the first sandbox, leaving Uriel to create anonymous fallback
+        # containers on every restart.
+        gateway_ready=0
+        for attempt in $(seq 1 60); do
+          if grpcurl -plaintext \
+            -proto "$PROTO_DIR/openshell.proto" \
+            -import-path "$PROTO_DIR" \
+            -d '{}' \
+            "$GATEWAY" openshell.v1.OpenShell/ListSandboxes >/dev/null 2>&1; then
+            gateway_ready=1
+            break
+          fi
+          sleep 1
+        done
+        if [ "$gateway_ready" -ne 1 ]; then
+          echo "OpenShell gateway did not become ready within 60 seconds" >&2
+          exit 1
+        fi
+
         for sandbox in $SANDBOXES; do
           SBOX_NAME="$sandbox-sandbox"
 
@@ -526,4 +547,3 @@ EOF
 
   };
 }
-

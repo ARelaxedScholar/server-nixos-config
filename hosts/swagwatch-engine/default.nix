@@ -658,7 +658,9 @@ systemd.services.hermes-gateway = {
     enable = true;
     envFile = /persist/etc/secrets/uriel.env;
     soulFile = /persist/etc/secrets/soul.md;
-    sys1Stub = false;
+    # Ollama is intentionally disabled on this CPU-only production host.
+    # Keep Uriel from entering a restart loop while no local Sys1 is available.
+    sys1Stub = true;
   };
 
   services.openshell = {
