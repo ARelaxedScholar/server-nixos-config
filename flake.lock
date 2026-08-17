@@ -534,11 +534,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1786833560,
-        "narHash": "sha256-ScWoBY4WwVfUW6Y+b5jGQqNm5OYsiuPTTWHZGXOYQjk=",
+        "lastModified": 1786631021,
+        "narHash": "sha256-YJgehvRQwPsbRyYrnZueUJsRy5mcT6315VQyjBHB+rg=",
         "ref": "main",
-        "rev": "17e165c259c25b61ba547827fce1162210f5b35b",
-        "revCount": 585,
+        "rev": "70227253f43b4e37be55212ec1900396a5aca26c",
+        "revCount": 582,
         "type": "git",
         "url": "file:///mnt/data/swagwatch-engine"
       },
@@ -558,11 +558,11 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1786833034,
-        "narHash": "sha256-Vy1TrOlQ9VCELmUm9tXGIWR09DK2kS2MjCSvYpiZ9DM=",
+        "lastModified": 1786968509,
+        "narHash": "sha256-WDFvOUzt7FvRWRwiGnAgT1plzK8RCKPvK7fxN5hHTko=",
         "ref": "main",
-        "rev": "ea64094dfb4f0d8cd06d31719d3fdb9972133012",
-        "revCount": 204,
+        "rev": "199a5d26fb4089bb733ce2ecaa3757f584a8d729",
+        "revCount": 205,
         "type": "git",
         "url": "file:///mnt/data/swagwatch-social-api"
       },
