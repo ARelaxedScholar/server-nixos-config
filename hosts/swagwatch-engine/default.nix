@@ -666,9 +666,14 @@ systemd.services.hermes-gateway = {
     enable = true;
     envFile = /persist/etc/secrets/uriel.env;
     soulFile = /persist/etc/secrets/soul.md;
-    # Ollama is intentionally disabled on this CPU-only production host.
-    # Keep Uriel from entering a restart loop while no local Sys1 is available.
-    sys1Stub = true;
+    # The production host is CPU-only, so use the configured NVIDIA NIM
+    # credentials for both fast cognition and semantic memory.
+    sys1Stub = false;
+    extraEnv = {
+      SYS1_BACKEND = "nvidia";
+      EMBEDDING_PROVIDER = "nvidia";
+      NVIDIA_EMBED_MODEL = "nvidia/nv-embedqa-e5-v5";
+    };
   };
 
   services.openshell = {

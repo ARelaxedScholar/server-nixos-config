@@ -288,7 +288,7 @@ EOF
           fi
 
           echo "Configuring durable workspace mount and essential identity for $sandbox"
-          docker exec "$container" sh -lc '
+          docker exec "$container" bash -lc '
             set -euo pipefail
             mkdir -p /sandbox/workspace
             chown -R sandbox:sandbox /sandbox/workspace || true
