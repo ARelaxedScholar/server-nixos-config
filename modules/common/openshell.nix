@@ -307,18 +307,17 @@ EOF
           # Restore persistent SSH host key so the key survives container recreation.
           # Without this, every sandbox recreate changes the host key and breaks the
           # Hermes SSH backend (stale entry in /home/user/.ssh/known_hosts).
-          # We read the key via a privileged container with /persist mounted because
-          # the Docker daemon may not have read access to /persist/openshell/*/ssh/.
+          # The lifecycle unit runs as root, so stream persistent keys directly.
+          # Depending on a transient helper image makes host activation contingent
+          # on an external registry even when the sandbox itself is healthy.
           host_key_dir="${persistentRoot}/$sandbox/ssh"
           if [ -f "$host_key_dir/ssh_host_ed25519_key" ] && [ -f "$host_key_dir/ssh_host_ed25519_key.pub" ]; then
-            docker run --rm -v /persist:/persist alpine sh -c \
-              'cat /persist/openshell/'"$sandbox"'/ssh/ssh_host_ed25519_key' \
+            cat "$host_key_dir/ssh_host_ed25519_key" \
               | docker exec -i "$container" bash -lc '
                   cat > /etc/ssh/ssh_host_ed25519_key
                   chmod 600 /etc/ssh/ssh_host_ed25519_key
                 '
-            docker run --rm -v /persist:/persist alpine sh -c \
-              'cat /persist/openshell/'"$sandbox"'/ssh/ssh_host_ed25519_key.pub' \
+            cat "$host_key_dir/ssh_host_ed25519_key.pub" \
               | docker exec -i "$container" bash -lc '
                   cat > /etc/ssh/ssh_host_ed25519_key.pub
                   chmod 644 /etc/ssh/ssh_host_ed25519_key.pub
