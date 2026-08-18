@@ -234,7 +234,15 @@ extraSetFlags = [ "--ssh" ];
   systemd.services.postgresql = {
     requires = [ "var-lib-postgresql.mount" ];
     after = [ "var-lib-postgresql.mount" ];
-    unitConfig.ConditionPathIsMountPoint = "/var/lib/postgresql";
+    unitConfig = {
+      ConditionPathIsMountPoint = "/var/lib/postgresql";
+      # If crash recovery requires a restart, ensure the consumer API is
+      # started once PostgreSQL is healthy instead of leaving it inactive.
+      Upholds = "swagwatch-social-api.service";
+    };
+    # Production crash recovery can legitimately exceed systemd's two-minute
+    # default while replaying WAL and completing the recovery checkpoint.
+    serviceConfig.TimeoutStartSec = "15min";
   };
 
   systemd.services."notify-failure@" = {

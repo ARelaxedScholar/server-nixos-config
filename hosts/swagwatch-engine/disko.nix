@@ -103,6 +103,7 @@
           "storage" = {
             type = "zfs_fs";
             mountpoint = "/mnt/data";
+            options.canmount = "noauto";
             mountOptions = [ "nofail" ];
           };
         };
