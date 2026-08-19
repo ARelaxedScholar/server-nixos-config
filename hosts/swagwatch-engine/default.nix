@@ -673,7 +673,36 @@ systemd.services.hermes-gateway = {
       SYS1_BACKEND = "nvidia";
       EMBEDDING_PROVIDER = "nvidia";
       NVIDIA_EMBED_MODEL = "nvidia/nv-embedqa-e5-v5";
+      SEARXNG_URL = "http://127.0.0.1:8888";
     };
+  };
+
+  # Private, no-key metasearch broker for Uriel. It is deliberately bound to
+  # loopback and is not exposed through the firewall; Uriel's OpenShell
+  # execution sandbox remains network-denied.
+  services.searx = {
+    enable = true;
+    openFirewall = false;
+    settings = {
+      server = {
+        bind_address = "127.0.0.1";
+        port = 8888;
+        secret_key = "uriel-loopback-search-no-browser-sessions";
+      };
+      search = {
+        safe_search = 1;
+        autocomplete = "";
+        formats = [
+          "html"
+          "json"
+        ];
+      };
+    };
+  };
+
+  systemd.services.uriel = {
+    after = [ "searx.service" ];
+    wants = [ "searx.service" ];
   };
 
   services.openshell = {
