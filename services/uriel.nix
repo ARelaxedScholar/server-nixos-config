@@ -55,6 +55,16 @@ in
       example = "/persist/etc/secrets/soul.md";
     };
 
+    sharedKnowledgeVault = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        Host path to the canonical shared Markdown knowledge vault. The path is
+        exposed read-only inside Uriel's private mount namespace.
+      '';
+      example = "/home/user/.hermes/profiles/midas/shared-memory-vault";
+    };
+
     sys1Stub = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -88,13 +98,15 @@ in
       groups.${cfg.group} = { };
     };
 
-    systemd.tmpfiles.rules = [
-      "d ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
-      "d ${cfg.stateDir}/workspace 0755 ${cfg.user} ${cfg.group} -"
-      "d ${cfg.stateDir}/workspace/streams 0755 ${cfg.user} ${cfg.group} -"
-      "d ${cfg.stateDir}/workspace/state 0755 ${cfg.user} ${cfg.group} -"
-      "d ${cfg.stateDir}/workspace/state-snapshots 0755 ${cfg.user} ${cfg.group} -"
-    ];
+    systemd.tmpfiles.rules =
+      [
+        "d ${cfg.stateDir} 0755 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.stateDir}/workspace 0755 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.stateDir}/workspace/streams 0755 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.stateDir}/workspace/state 0755 ${cfg.user} ${cfg.group} -"
+        "d ${cfg.stateDir}/workspace/state-snapshots 0755 ${cfg.user} ${cfg.group} -"
+      ]
+      ++ lib.optional (cfg.sharedKnowledgeVault != null) "d ${cfg.stateDir}/shared-memory-vault 0750 ${cfg.user} ${cfg.group} -";
 
     systemd.services.uriel = {
       description = "Uriel — 24/7 autonomous agent";
@@ -118,6 +130,9 @@ in
       // (lib.optionalAttrs cfg.sys1Stub {
         SYS1_STUB = "1";
       })
+      // (lib.optionalAttrs (cfg.sharedKnowledgeVault != null) {
+        SHARED_KNOWLEDGE_VAULT = "${cfg.stateDir}/shared-memory-vault";
+      })
       // cfg.extraEnv;
 
       serviceConfig = {
@@ -130,6 +145,9 @@ in
         RestartSec = "10s";
         MemoryMax = "2G";
         EnvironmentFile = lib.mkIf (cfg.envFile != null) cfg.envFile;
+        BindReadOnlyPaths = lib.optionals (cfg.sharedKnowledgeVault != null) [
+          "${cfg.sharedKnowledgeVault}:${cfg.stateDir}/shared-memory-vault"
+        ];
       };
     };
   };

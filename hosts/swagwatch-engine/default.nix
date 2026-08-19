@@ -666,6 +666,7 @@ systemd.services.hermes-gateway = {
     enable = true;
     envFile = /persist/etc/secrets/uriel.env;
     soulFile = /persist/etc/secrets/soul.md;
+    sharedKnowledgeVault = "/home/user/.hermes/profiles/midas/shared-memory-vault";
     # The production host is CPU-only, so use the configured NVIDIA NIM
     # credentials for both fast cognition and semantic memory.
     sys1Stub = false;
