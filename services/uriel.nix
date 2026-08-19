@@ -43,7 +43,8 @@ in
       description = ''
         Path to a .env file with API keys and configuration.
         Required: NVIDIA_API_KEY, DISCORD_BOT_TOKEN, DISCORD_CHANNEL_ID, DISCORD_OPERATOR_USER_ID
-        Optional: TAVILY_API_KEY, OLLAMA_HOST, OLLAMA_MODEL, NIM_MODEL_HEAVY, NIM_MODEL_LIGHT
+        Optional: SEARXNG_URL, TAVILY_API_KEY, OLLAMA_HOST, OLLAMA_MODEL,
+        NIM_MODEL_HEAVY, NIM_MODEL_LIGHT
       '';
       example = "/persist/etc/secrets/uriel.env";
     };
