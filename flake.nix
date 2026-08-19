@@ -22,7 +22,7 @@
     # GitLab SSH credentials. Directory suffixes identify the mirrored commits.
     watchtower.url = "path:/mnt/data/vendor/watchtower-464fb957";
     uriel = {
-      url = "path:/mnt/data/vendor/uriel-66f6362";
+      url = "path:/mnt/data/vendor/uriel-290b0e0";
       flake = true;
     };
   };
