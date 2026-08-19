@@ -689,13 +689,13 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1787171608,
-        "narHash": "sha256-8Pc/85siWLgNKCnZ4R7KI1Mmf0S1rAIGMezvAup2PUc=",
-        "path": "/mnt/data/vendor/uriel-0fe8627",
+        "lastModified": 1787172367,
+        "narHash": "sha256-cEsgCYNy2Cwr4yQcgGN43qgLPo6mERf5w/fxQ8i7v0A=",
+        "path": "/mnt/data/vendor/uriel-7c80a45",
         "type": "path"
       },
       "original": {
-        "path": "/mnt/data/vendor/uriel-0fe8627",
+        "path": "/mnt/data/vendor/uriel-7c80a45",
         "type": "path"
       }
     },
