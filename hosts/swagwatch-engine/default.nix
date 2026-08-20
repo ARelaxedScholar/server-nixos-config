@@ -675,6 +675,7 @@ systemd.services.hermes-gateway = {
       EMBEDDING_PROVIDER = "nvidia";
       NVIDIA_EMBED_MODEL = "nvidia/nv-embedqa-e5-v5";
       SEARXNG_URL = "http://127.0.0.1:8888";
+      NIM_MAX_TOKENS = "4096";
     };
   };
 
