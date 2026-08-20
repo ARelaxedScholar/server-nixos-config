@@ -91,6 +91,9 @@ in
       users.${cfg.user} = {
         isSystemUser = true;
         group = cfg.group;
+        # The OpenShell persistent workspace is group-owned by `users` so the
+        # host service can place Discord attachments into the sandbox inbox.
+        extraGroups = [ "users" ];
         description = "Uriel autonomous agent service user";
         home = cfg.stateDir;
         createHome = true;
@@ -123,6 +126,7 @@ in
         DATABASE_URL = "sqlite:${cfg.stateDir}/workspace/memory.db";
         STREAM_DIR = "${cfg.stateDir}/workspace/streams";
         WORKSPACE_DIR = "${cfg.stateDir}/workspace";
+        SANDBOX_WORKSPACE_DIR = "/persist/openshell/${cfg.user}/workspace";
         ACTIVE_STREAM_FILE = "${cfg.stateDir}/workspace/streams/stream_001.log";
         RUST_LOG = "info,uriel=debug";
         PATH = lib.mkForce "/usr/local/bin:/run/current-system/sw/bin:${pkgs.coreutils}/bin:${pkgs.uv}/bin";
