@@ -677,6 +677,7 @@ systemd.services.hermes-gateway = {
       SEARXNG_URL = "http://127.0.0.1:8888";
       NIM_MAX_TOKENS = "4096";
       NIM_MODEL_LIGHT = "meta/llama-3.1-8b-instruct";
+      NIM_REQUEST_TIMEOUT_SECS = "30";
     };
   };
 
