@@ -96,6 +96,7 @@ in
       "d ${cfg.stateDir}/workspace/streams 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/workspace/state 0755 ${cfg.user} ${cfg.group} -"
       "d ${cfg.stateDir}/workspace/state-snapshots 0755 ${cfg.user} ${cfg.group} -"
+      "d /persist/openshell/${cfg.user}/workspace/inbox 0775 998 users -"
     ];
 
     systemd.services.uriel = {
