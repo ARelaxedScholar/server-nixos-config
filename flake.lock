@@ -689,8 +689,8 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1787290879,
-        "narHash": "sha256-wFFtcrhuaQupoyU6NrjPOq2FKH8WYsE9zF1+QN7leqM=",
+        "lastModified": 1787291573,
+        "narHash": "sha256-Lu0nJAzzBpXxr0MKTNRyZWR3aoO0KHEcuZEH3bzJNuE=",
         "path": "/mnt/data/vendor/uriel-8834final",
         "type": "path"
       },
