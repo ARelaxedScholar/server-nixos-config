@@ -715,9 +715,9 @@ systemd.services.hermes-gateway = {
   # services.uriel.enable = false and remove its persistence entry below.
   services.ciel = {
     enable = true;
-    envFile = /persist/etc/secrets/ciel.env;
-    soulFile = /persist/etc/secrets/soul.md;
-    agentDir = /persist/etc/secrets/ciel-agent;
+    envFile = "/persist/etc/secrets/ciel.env";
+    soulFile = "/persist/etc/secrets/soul.md";
+    agentDir = "/persist/etc/secrets/ciel-agent";
   };
 
   services.openshell = {
