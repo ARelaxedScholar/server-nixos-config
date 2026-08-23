@@ -38,7 +38,7 @@ in
     };
 
     envFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
+      type = lib.types.nullOr lib.types.str;
       default = null;
       description = ''
         Path to a .env file with API keys and configuration.
@@ -49,13 +49,13 @@ in
     };
 
     soulFile = lib.mkOption {
-      type = lib.types.path;
+      type = lib.types.str;
       description = "Path to soul.md (Ciel's immutable identity document)";
       example = "/persist/etc/secrets/soul.md";
     };
 
     agentDir = lib.mkOption {
-      type = lib.types.path;
+      type = lib.types.str;
       default = "/persist/etc/secrets/ciel-agent";
       description = ''
         pi agent config dir holding auth.json (provider credentials) and
