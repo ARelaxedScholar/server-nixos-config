@@ -20,6 +20,7 @@
     ../../services/watchtower.nix
     # ../../services/weaver.nix
     ../../services/uriel.nix
+    ../../services/ciel.nix
     ../../services/forge.nix
   ];
 
@@ -589,6 +590,16 @@ systemd.services.hermes-gateway = {
     sys1Stub = false;
   };
 
+  # Ciel = Uriel evolved, on the pi SDK. Keep Uriel running until Ciel has
+  # proven itself (Discord token stays out of ciel.env until then), then set
+  # services.uriel.enable = false and remove its persistence entry below.
+  services.ciel = {
+    enable = true;
+    envFile = /persist/etc/secrets/ciel.env;
+    soulFile = /persist/etc/secrets/soul.md;
+    agentDir = /persist/etc/secrets/ciel-agent;
+  };
+
   services.openshell = {
     enable = true;
   };
@@ -675,6 +686,12 @@ systemd.services.hermes-gateway = {
         directory = "/var/lib/uriel";
         user = "uriel";
         group = "uriel";
+        mode = "0755";
+      }
+      {
+        directory = "/var/lib/ciel";
+        user = "ciel";
+        group = "ciel";
         mode = "0755";
       }
       "/home/user/"
