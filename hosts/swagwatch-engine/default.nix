@@ -708,14 +708,7 @@ systemd.services.hermes-gateway = {
     };
   };
 
-  systemd.services.uriel = {
-    after = [ "searx.service" ];
-    wants = [ "searx.service" ];
-  };
-
-  # Ciel = Uriel evolved, on the pi SDK. Keep Uriel running until Ciel has
-  # proven itself (Discord token stays out of ciel.env until then), then set
-  # services.uriel.enable = false and remove its persistence entry below.
+  # Ciel (pi SDK daemon) is the 24/7 agent; Uriel is retired.
   services.ciel = {
     enable = true;
     envFile = "/persist/etc/secrets/ciel.env";
