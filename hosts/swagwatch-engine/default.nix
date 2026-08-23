@@ -663,8 +663,11 @@ systemd.services.hermes-gateway = {
 #    enableLeadgen = true;
 #  };
 
+  # Uriel retired 2026-08-23. Ciel (pi SDK daemon) is the 24/7 agent; its
+  # memory was migrated from /var/lib/uriel/workspace/memory.db. The uriel
+  # persistence entry below is retained as a pre-migration backup.
   services.uriel = {
-    enable = true;
+    enable = false;
     envFile = /persist/etc/secrets/uriel.env;
     soulFile = /persist/etc/secrets/soul.md;
     sharedKnowledgeVault = "/home/user/.hermes/profiles/midas/shared-memory-vault";
