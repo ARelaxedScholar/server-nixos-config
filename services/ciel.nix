@@ -104,7 +104,7 @@ in
         PI_CODING_AGENT_DIR = cfg.agentDir;
         # pi's bash tool spawns sh; systemd default service PATH has none of
         # the tools the agent needs (python3, curl, git, ...).
-        PATH = "/usr/local/bin:/run/current-system/sw/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin:${pkgs.python3}/bin";
+        PATH = lib.mkForce "/usr/local/bin:/run/current-system/sw/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin:${pkgs.python3}/bin";
       }
       // cfg.extraEnv;
 
