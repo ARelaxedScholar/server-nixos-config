@@ -8,6 +8,14 @@
 let
   cfg = config.services.ciel;
   cielPkg = inputs.ciel.packages.x86_64-linux.ciel;
+  # Python with data science stack so the agent can backtest instead of
+  # spending turns installing packages (server has no pip).
+  pythonPkg = pkgs.python3.withPackages (ps: [
+    ps.pandas
+    ps.numpy
+    ps.scipy
+    ps.pip
+  ]);
 in
 {
   options.services.ciel = {
@@ -104,7 +112,7 @@ in
         PI_CODING_AGENT_DIR = cfg.agentDir;
         # pi's bash tool spawns sh; systemd default service PATH has none of
         # the tools the agent needs (python3, curl, git, ...).
-        PATH = lib.mkForce "/usr/local/bin:/run/current-system/sw/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin:${pkgs.python3}/bin";
+        PATH = lib.mkForce "${pythonPkg}/bin:/usr/local/bin:/run/current-system/sw/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin:${pkgs.python3}/bin";
       }
       // cfg.extraEnv;
 
