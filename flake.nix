@@ -25,6 +25,12 @@
       url = "path:/mnt/data/vendor/uriel-8834final";
       flake = true;
     };
+    # Ciel = Uriel evolved (pi SDK daemon). Local mirror, same convention.
+    ciel = {
+      url = "path:/mnt/data/vendor/ciel-d08b3b3";
+      flake = true;
+    };
+    ciel.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
